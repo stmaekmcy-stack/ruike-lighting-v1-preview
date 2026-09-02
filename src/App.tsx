@@ -19,11 +19,10 @@ type ProductMode = {
 }
 
 const navItems = [
-  { label: '品牌', href: '#brand' },
-  { label: '好灯光', href: '#standard' },
-  { label: '交付', href: '#process' },
-  { label: '项目', href: '#projects' },
-  { label: '产品', href: '#products' },
+  { label: '灯光效果', href: '#standard' },
+  { label: '真实项目', href: '#projects' },
+  { label: '效果交付', href: '#process' },
+  { label: '关于瑞客', href: '#brand' },
 ]
 
 const principles = [
