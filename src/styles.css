@@ -107,9 +107,10 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .hero__image { position: absolute; inset: 0; background: url('/assets/hero-architecture.png') center center / cover no-repeat; }
 .hero__edge-fade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(11, 12, 12, 0.92) 0%, rgba(11, 12, 12, 0.68) 30%, rgba(11, 12, 12, 0.16) 66%, rgba(11, 12, 12, 0.02) 100%); }
 .hero__content { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-height: min(900px, 100vh); padding-top: 110px; }
-.hero__location { margin: 0 0 28px; color: var(--gold-soft); font-family: "DM Mono", monospace; font-size: 10px; letter-spacing: 0.12em; }
+.hero__location { margin: 0 0 12px; color: var(--gold-soft); font-family: "DM Mono", monospace; font-size: 10px; letter-spacing: 0.12em; }
 .hero h1 { margin: 0; font-size: clamp(58px, 8.5vw, 132px); font-weight: 500; letter-spacing: -0.1em; line-height: 0.96; }
-.hero h1 span { color: var(--gold-soft); }
+.hero h1 .hero__promise { display: block; margin-bottom: 16px; color: var(--gold-soft); font-family: "DM Mono", monospace; font-size: 10px; font-weight: 500; letter-spacing: 0.12em; line-height: 1.4; }
+.hero h1 .hero__result { color: var(--gold-soft); }
 .hero__intro { max-width: 480px; margin: 38px 0 42px; color: rgba(247, 245, 240, 0.75); font-size: 16px; line-height: 1.85; }
 .hero__scroll { position: absolute; z-index: 1; right: 56px; bottom: 46px; display: flex; align-items: center; gap: 14px; color: rgba(247, 245, 240, 0.66); font-family: "DM Mono", monospace; font-size: 9px; letter-spacing: 0.13em; transform: rotate(90deg); transform-origin: right center; }
 .hero__scroll-line { display: block; width: 76px; height: 1px; background: currentColor; }
@@ -117,6 +118,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .brand-section { min-height: 840px; padding: 170px 0 100px; }
 .brand-section__grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 10vw; align-items: end; }
 .brand-section h2, .process-section h2, .projects-section h2, .products-section h2, .start-section h2 { margin: 0; font-size: clamp(45px, 6vw, 88px); font-weight: 500; letter-spacing: -0.1em; line-height: 1.02; }
+.brand-section__headline h2 { margin-top: 48px; }
 .brand-section h2 em { color: #a98b61; font-style: normal; }
 .brand-section__body { padding-bottom: 8px; }
 .brand-section__principles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 34px; margin-top: 170px; }
@@ -128,7 +130,8 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .standard-section { min-height: 880px; padding: 160px 0 124px; }
 .standard-section__intro { display: flex; align-items: end; justify-content: space-between; gap: 40px; padding-right: 5vw; }
 .standard-section h2 { margin: 0; font-size: clamp(46px, 6vw, 84px); font-weight: 500; letter-spacing: -0.1em; line-height: 1; }
-.standard-section__intro > p:last-child { max-width: 230px; margin: 0 0 5px; color: var(--muted-light); font-size: 13px; line-height: 1.8; }
+.standard-section__intro > p:last-child { max-width: 330px; margin: 0 0 5px; color: #c3c1ba; font-size: 13px; line-height: 1.8; }
+.standard-section__intro-copy span { display: block; }
 .principle-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px; margin-top: 108px; }
 .principle { min-width: 0; padding-top: 22px; border-top: 1px solid var(--line-light); }
 .principle__visual { position: relative; height: 226px; margin-bottom: 28px; overflow: hidden; background: #212323; }
@@ -147,8 +150,8 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .principle__visual--ambient .principle__object { right: 12%; bottom: 27px; width: 77%; height: 1px; border-width: 1px 0 0; }
 .principle__meta { display: flex; align-items: center; gap: 12px; color: var(--gold-soft); font-family: "DM Mono", monospace; font-size: 9px; letter-spacing: 0.1em; }
 .principle__rule { width: 28px; height: 1px; background: currentColor; opacity: 0.8; }
-.principle h3 { margin: 18px 0 12px; font-size: 17px; font-weight: 500; }
-.principle p { max-width: 180px; margin: 0; color: var(--muted-light); font-size: 12px; line-height: 1.8; }
+.principle h3 { margin: 18px 0 12px; color: #e5e2db; font-size: 17px; font-weight: 500; }
+.principle p { max-width: 180px; margin: 0; color: #c3c1ba; font-size: 12px; line-height: 1.8; }
 
 .process-section { min-height: 860px; padding: 168px 0 120px; }
 .process-section__header { display: flex; align-items: end; justify-content: space-between; gap: 60px; }
@@ -196,6 +199,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .products-section h2 { font-size: clamp(45px, 5.7vw, 84px); }
 .products-section h2.products-section__headline { font-size: clamp(42px, 4vw, 58px); }
 .products-section__content .body-copy { margin: 34px 0 42px; }
+.products-section__content--summary { grid-column: 2; }
 .product-index { border-top: 1px solid var(--line); }
 .product-index__item { display: grid; grid-template-columns: 40px 1fr 22px; gap: 16px; align-items: center; width: 100%; padding: 17px 0; border: 0; border-bottom: 1px solid var(--line); color: var(--muted); background: transparent; text-align: left; transition: color 200ms ease, padding 200ms ease; }
 .product-index__item:hover, .product-index__item--active { padding-left: 8px; color: var(--ink); }
@@ -224,6 +228,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .project-form input:focus, .project-form select:focus, .project-form textarea:focus { border-color: var(--gold-soft); }
 .project-form .button { margin-top: 8px; justify-self: start; }
 .form-note { margin: -12px 0 0; color: rgba(247, 245, 240, 0.45); font-family: "DM Mono", monospace; font-size: 9px; letter-spacing: 0.04em; }
+.section-anchor { display: block; height: 0; scroll-margin-top: 72px; }
 .site-footer { position: relative; z-index: 1; display: flex; align-items: center; justify-content: space-between; margin-top: 170px; padding-top: 22px; padding-bottom: 30px; border-top: 1px solid var(--line-light); color: var(--muted-light); font-family: "DM Mono", monospace; font-size: 9px; letter-spacing: 0.06em; }
 .brand-lockup--footer { color: var(--white); font-family: Manrope, sans-serif; }
 .back-top { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid rgba(247, 245, 240, 0.35); }
@@ -300,6 +305,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
   .archive-status { flex-wrap: wrap; gap: 10px; line-height: 1.7; }
   .archive-status__code { width: 100%; margin-left: 0; }
   .products-section__grid { display: flex; flex-direction: column; gap: 62px; }
+  .products-section__content--summary { grid-column: auto; }
   .product-media { width: 100%; }
   .product-media__main { height: 110vw; max-height: 480px; }
   .product-media__caption { display: block; line-height: 1.8; }

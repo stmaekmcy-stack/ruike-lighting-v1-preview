@@ -10,12 +10,27 @@ type ProcessStep = {
   detail: string
 }
 
+type PublicationStatus = 'draft' | 'published'
+
 type ProductMode = {
   title: string
   english: string
   description: string
   image: string
   alt: string
+  status: PublicationStatus
+}
+
+type ProjectArchiveItem = {
+  id: string
+  className: string
+  label: string
+  status: PublicationStatus
+  isRuikeProject?: boolean
+  imageSourceVerified?: boolean
+  approvedForPublication?: boolean
+  metadataVerified?: boolean
+  contentReady?: boolean
 }
 
 const navItems = [
@@ -25,14 +40,14 @@ const navItems = [
   { label: '关于瑞客', href: '#brand' },
 ]
 
-const showProjectArchive = import.meta.env.DEV
+const isDevelopment = import.meta.env.DEV
 
 const principles = [
-  { title: '视觉需求', body: '真实使用所需的视觉条件是否合适。', motif: 'beam' },
-  { title: '视觉舒适', body: '人能否自然、稳定地观看。', motif: 'soft' },
-  { title: '对象呈现', body: '值得被看见的对象是否呈现恰当。', motif: 'object' },
-  { title: '空间感知', body: '光是否帮助人正确理解空间。', motif: 'depth' },
-  { title: '空间氛围', body: '整体视觉状态是否与场所相符。', motif: 'ambient' },
+  { title: '视觉需求', body: '真实使用所需的视觉条件是否得到适宜回应。', motif: 'beam' },
+  { title: '视觉舒适', body: '人在主要使用与观看位置能否自然、稳定地观看。', motif: 'soft' },
+  { title: '对象呈现', body: '重要人物、物品与材料是否被恰当呈现。', motif: 'object' },
+  { title: '空间感知', body: '光是否帮助人自然理解空间的重点、主次、前后、深度、边界与方向。', motif: 'depth' },
+  { title: '空间氛围', body: '整体视觉状态是否与建筑、功能、活动、时间及设计意图相符。', motif: 'ambient' },
 ]
 
 const processSteps: ProcessStep[] = [
@@ -87,6 +102,7 @@ const productModes: ProductMode[] = [
     description: '稳定、克制，适合基础与重点照明。',
     image: '/assets/recessed-light-on.jpeg',
     alt: '瑞客内嵌灯具开灯效果资料图',
+    status: 'draft',
   },
   {
     title: '深杯防眩',
@@ -94,6 +110,7 @@ const productModes: ProductMode[] = [
     description: '见光不见灯，让光柔和地落下，而不是刺向视线。',
     image: '/assets/recessed-light-off.jpeg',
     alt: '瑞客深杯防眩灯具资料图',
+    status: 'draft',
   },
   {
     title: '产品家族',
@@ -101,6 +118,7 @@ const productModes: ProductMode[] = [
     description: '以产品架构承接不同空间任务，正式选型以最新技术确认单为准。',
     image: '/assets/recessed-light-family.jpeg',
     alt: '瑞客内嵌灯具产品家族资料图',
+    status: 'draft',
   },
   {
     title: '选型资料',
@@ -108,8 +126,32 @@ const productModes: ProductMode[] = [
     description: '参数是选择的工具，不是效果的替代；资料位持续维护中。',
     image: '/assets/recessed-light-options.png',
     alt: '瑞客内嵌灯具选型资料图',
+    status: 'draft',
   },
 ]
+
+const projectArchive: ProjectArchiveItem[] = [
+  { id: 'slot-01', className: 'project-placeholder--tall', label: 'PROJECT IMAGE / 待补充真实项目影像', status: 'draft' },
+  { id: 'slot-02', className: 'project-placeholder--tall project-placeholder--warm', label: 'PROJECT IMAGE / 待补充真实项目影像', status: 'draft' },
+  { id: 'slot-03', className: 'project-placeholder--wide', label: 'PROJECT IMAGE / 待补充真实项目影像', status: 'draft' },
+  { id: 'slot-04', className: '', label: 'PROJECT IMAGE / 待补充', status: 'draft' },
+  { id: 'slot-05', className: '', label: 'PROJECT IMAGE / 待补充', status: 'draft' },
+]
+
+const visibleProjects = isDevelopment
+  ? projectArchive
+  : projectArchive.filter((project) => (
+      project.status === 'published'
+      && project.isRuikeProject === true
+      && project.imageSourceVerified === true
+      && project.approvedForPublication === true
+      && project.metadataVerified === true
+      && project.contentReady === true
+    ))
+
+const visibleProductModes = isDevelopment
+  ? productModes
+  : productModes.filter((product) => product.status === 'published')
 
 function Icon({ name }: { name: IconName }) {
   if (name === 'arrow') {
@@ -182,7 +224,7 @@ function App() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    setFormStatus('preview')
+    if (isDevelopment) setFormStatus('preview')
   }
 
   return (
@@ -225,11 +267,12 @@ function App() {
           <div className="hero__edge-fade" />
           <SectionRail number="01" label="LIGHT AS RESULT" light />
           <div className="hero__content page-width">
-            <p className="hero__location">灯光效果交付品牌 / 效果保障</p>
+            <p className="hero__location">灯光效果交付品牌</p>
             <h1>
+              <span className="hero__promise">效果保障，</span>
               让好灯光
               <br />
-              <span>看得见。</span>
+              <span className="hero__result">看得见。</span>
             </h1>
             <p className="hero__intro">
               为客户实现期待的灯光效果，
@@ -250,7 +293,6 @@ function App() {
           <SectionRail number="02" label="WHAT WE DELIVER" />
           <div className="page-width brand-section__grid">
             <div className="brand-section__headline reveal-up">
-              <p className="section-kicker">灯光效果交付品牌</p>
               <h2>
                 光，
                 <br />
@@ -262,7 +304,7 @@ function App() {
             <div className="brand-section__body reveal-up">
               <p className="display-quote">不止卖灯，效果交付。</p>
               <p className="body-copy">
-                灯光效果，是灯光在真实空间以及实际使用、观看条件下最终形成并被人感知到的视觉结果。
+                灯光效果，是灯光在真实空间以及实际使用、观看条件下，最终形成并被人感知到的视觉结果。
               </p>
               <a className="text-link" href="#standard">
                 了解瑞客的判断标准 <Icon name="arrow" />
@@ -278,12 +320,12 @@ function App() {
             <div className="open-principle">
               <span>02</span>
               <strong>产品承载效果</strong>
-              <small>通过合适的产品、光学与技术能力实现设计意图。</small>
+              <small>通过合适的产品、光学与技术能力，支撑灯光效果目标的实现。</small>
             </div>
             <div className="open-principle">
               <span>03</span>
               <strong>交付兑现效果</strong>
-              <small>从方案到现场、调试和验收，对最终结果负责。</small>
+              <small>从方案、现场到专业调试与效果验收，对最终结果负责。</small>
             </div>
           </div>
         </section>
@@ -294,7 +336,11 @@ function App() {
             <div className="standard-section__intro reveal-up">
               <p className="section-kicker section-kicker--light">RUIKE GOOD LIGHT</p>
               <h2>什么样的灯光，才叫好？</h2>
-              <p>瑞客用五个相互关联的质量观察面判断好灯光效果，不以单一参数代替整体判断。</p>
+              <p className="standard-section__intro-copy">
+                <span>瑞客用五个相互关联的质量观察面判断灯光效果：</span>
+                <span>单项看是否恰当，整体看是否相符，</span>
+                <span>不以单一参数代替整体判断。</span>
+              </p>
             </div>
             <div className="principle-list">
               {principles.map((principle, index) => (
@@ -324,7 +370,7 @@ function App() {
                 <h2 className="process-section__judgements">
                   图纸完成 ≠ 效果完成<br />
                   产品到场 ≠ 效果完成<br />
-                  安装完成 ≠ 效果完成
+                  灯具安装完成 ≠ 效果完成
                 </h2>
               </div>
               <p className="process-section__note">只有约定的灯光效果在真实空间中被合理实现，并通过专业调试与效果验收，才构成完整效果交付。</p>
@@ -354,7 +400,7 @@ function App() {
           </div>
         </section>
 
-        {showProjectArchive && (
+        {visibleProjects.length > 0 ? (
           <section className="projects-section section-paper" id="projects">
             <SectionRail number="05" label="PROJECT ARCHIVE" />
             <div className="page-width">
@@ -368,26 +414,12 @@ function App() {
                 </p>
               </div>
               <div className="project-archive-grid">
-                <div className="project-placeholder project-placeholder--tall">
-                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                  <span>PROJECT IMAGE / 待补充真实项目影像</span>
-                </div>
-                <div className="project-placeholder project-placeholder--tall project-placeholder--warm">
-                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                  <span>PROJECT IMAGE / 待补充真实项目影像</span>
-                </div>
-                <div className="project-placeholder project-placeholder--wide">
-                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                  <span>PROJECT IMAGE / 待补充真实项目影像</span>
-                </div>
-                <div className="project-placeholder">
-                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                  <span>PROJECT IMAGE / 待补充</span>
-                </div>
-                <div className="project-placeholder">
-                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                  <span>PROJECT IMAGE / 待补充</span>
-                </div>
+                {visibleProjects.map((project) => (
+                  <div className={`project-placeholder ${project.className}`.trim()} key={project.id}>
+                    <span className="project-placeholder__cross"><Icon name="plus" /></span>
+                    <span>{project.label}</span>
+                  </div>
+                ))}
               </div>
               <div className="archive-status">
                 <span>ARCHIVE STATUS</span>
@@ -397,42 +429,52 @@ function App() {
               </div>
             </div>
           </section>
+        ) : (
+          <span className="section-anchor" id="projects" aria-hidden="true" />
         )}
 
         <section className="products-section section-light" id="products">
           <SectionRail number="06" label="PRODUCT AS CARRIER" />
           <div className="page-width products-section__grid">
-            <div className="product-media reveal-up">
-              <div className="product-media__main">
-                <img src={productModes[activeProduct].image} alt={productModes[activeProduct].alt} />
-                <span className="media-index">0{activeProduct + 1} / 04</span>
+            {visibleProductModes.length > 0 ? (
+              <div className="product-media reveal-up">
+                <div className="product-media__main">
+                  <img src={visibleProductModes[activeProduct].image} alt={visibleProductModes[activeProduct].alt} />
+                  <span className="media-index">0{activeProduct + 1} / 0{visibleProductModes.length}</span>
+                </div>
+                <div className="product-media__caption">
+                  <span>PRODUCT MATERIAL / 资料图</span>
+                  <span>正式选型以最新技术确认单为准</span>
+                </div>
               </div>
-              <div className="product-media__caption">
-                <span>PRODUCT MATERIAL / 资料图</span>
-                <span>正式选型以最新技术确认单为准</span>
-              </div>
-            </div>
-            <div className="products-section__content reveal-up">
+            ) : null}
+            <div className={`products-section__content reveal-up ${visibleProductModes.length === 0 ? 'products-section__content--summary' : ''}`}>
               <p className="section-kicker">产品，是实现效果的载体。</p>
               <h2 className="products-section__headline">为不同效果任务，<br />匹配合适的产品能力。</h2>
               <p className="body-copy">先明确需要实现什么灯光效果，再确定配光、产品、控制及相应技术条件。</p>
-              <div className="product-index">
-                {productModes.map((product, index) => (
-                  <button
-                    className={`product-index__item ${activeProduct === index ? 'product-index__item--active' : ''}`}
-                    type="button"
-                    key={product.title}
-                    onClick={() => setActiveProduct(index)}
-                  >
-                    <span>0{index + 1}</span>
-                    <span>
-                      <strong>{product.title}</strong>
-                      <small>{product.english}</small>
-                    </span>
-                    <Icon name="arrow" />
-                  </button>
-                ))}
-              </div>
+              {visibleProductModes.length > 0 ? (
+                <div className="product-index">
+                  {visibleProductModes.map((product, index) => (
+                    <button
+                      className={`product-index__item ${activeProduct === index ? 'product-index__item--active' : ''}`}
+                      type="button"
+                      key={product.title}
+                      onClick={() => setActiveProduct(index)}
+                    >
+                      <span>0{index + 1}</span>
+                      <span>
+                        <strong>{product.title}</strong>
+                        <small>{product.english}</small>
+                      </span>
+                      <Icon name="arrow" />
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <a className="text-link" href="#start">
+                  发起项目 <Icon name="arrow" />
+                </a>
+              )}
             </div>
           </div>
         </section>
@@ -470,9 +512,9 @@ function App() {
                 <textarea name="brief" placeholder="空间位置、阶段或正在遇到的问题" rows={3} />
               </label>
               <button className="button button--outline-light" type="submit">
-                {formStatus === 'preview' ? 'V1.0 预览｜接口待接入' : '提交项目需求'} <Icon name="arrow" />
+                {isDevelopment && formStatus === 'preview' ? 'V1.0 预览｜接口待接入' : '提交项目需求'} <Icon name="arrow" />
               </button>
-              <p className="form-note">当前为官网 V1.0 预览，表单接口待接入。</p>
+              {isDevelopment ? <p className="form-note">当前为官网 V1.0 预览，表单接口待接入。</p> : null}
             </form>
           </div>
           <footer className="page-width site-footer">
