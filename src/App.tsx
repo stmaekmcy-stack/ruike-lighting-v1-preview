@@ -270,9 +270,8 @@ function App() {
             <p className="hero__location">灯光效果交付品牌</p>
             <h1>
               <span className="hero__promise">效果保障，</span>
-              让好灯光
-              <br />
-              <span className="hero__result">看得见。</span>
+              <span className="title-line">让好灯光</span>
+              <span className="title-line hero__result">看得见。</span>
             </h1>
             <p className="hero__intro">
               为客户实现期待的灯光效果，
@@ -293,12 +292,10 @@ function App() {
           <SectionRail number="02" label="WHAT WE DELIVER" />
           <div className="page-width brand-section__grid">
             <div className="brand-section__headline reveal-up">
-              <h2>
-                光，
-                <br />
-                是空间的
-                <br />
-                <em>第二次塑造。</em>
+              <h2 className="section-title brand-section__title">
+                <span className="title-line">光，</span>
+                <span className="title-line">是空间的</span>
+                <em className="title-line">第二次塑造。</em>
               </h2>
             </div>
             <div className="brand-section__body reveal-up">
@@ -335,7 +332,10 @@ function App() {
           <div className="page-width">
             <div className="standard-section__intro reveal-up">
               <p className="section-kicker section-kicker--light">RUIKE GOOD LIGHT</p>
-              <h2>什么样的灯光，才叫好？</h2>
+              <h2 className="section-title standard-section__title">
+                <span className="title-line">什么样的灯光，</span>
+                <span className="title-line">才叫好？</span>
+              </h2>
               <p className="standard-section__intro-copy">
                 <span>瑞客用五个相互关联的质量观察面判断灯光效果：</span>
                 <span>单项看是否恰当，整体看是否相符，</span>
@@ -367,10 +367,10 @@ function App() {
             <div className="process-section__header reveal-up">
               <div>
                 <p className="section-kicker">效果目标先于产品选择</p>
-                <h2 className="process-section__judgements">
-                  图纸完成 ≠ 效果完成<br />
-                  产品到场 ≠ 效果完成<br />
-                  灯具安装完成 ≠ 效果完成
+                <h2 className="section-title process-section__judgements">
+                  <span className="title-line">图纸完成 ≠ 效果完成</span>
+                  <span className="title-line">产品到场 ≠ 效果完成</span>
+                  <span className="title-line">灯具安装完成 ≠ 效果完成</span>
                 </h2>
               </div>
               <p className="process-section__note">只有约定的灯光效果在真实空间中被合理实现，并通过专业调试与效果验收，才构成完整效果交付。</p>
@@ -407,7 +407,10 @@ function App() {
               <div className="projects-section__header reveal-up">
                 <div>
                   <p className="section-kicker">真实项目，正在归档</p>
-                  <h2>先把真实<br />留出来。</h2>
+                  <h2 className="section-title projects-section__title">
+                    <span className="title-line">先把真实</span>
+                    <span className="title-line">留出来。</span>
+                  </h2>
                 </div>
                 <p className="projects-section__note">
                   官网当前尚未接入可公开核验的项目影像与项目数据。正式内容接入前，这里保留真实项目位，不以虚构案例填充。
@@ -450,7 +453,10 @@ function App() {
             ) : null}
             <div className={`products-section__content reveal-up ${visibleProductModes.length === 0 ? 'products-section__content--summary' : ''}`}>
               <p className="section-kicker">产品，是实现效果的载体。</p>
-              <h2 className="products-section__headline">为不同效果任务，<br />匹配合适的产品能力。</h2>
+              <h2 className="section-title products-section__headline">
+                <span className="title-line">为不同效果任务，</span>
+                <span className="title-line">匹配合适的产品能力。</span>
+              </h2>
               <p className="body-copy">先明确需要实现什么灯光效果，再确定配光、产品、控制及相应技术条件。</p>
               {visibleProductModes.length > 0 ? (
                 <div className="product-index">
@@ -485,7 +491,10 @@ function App() {
           <div className="page-width start-section__grid">
             <div className="start-section__intro reveal-up">
               <p className="section-kicker section-kicker--light">START WITH SPACE</p>
-              <h2>发起一个<br /><span>项目。</span></h2>
+              <h2 className="section-title start-section__title">
+                <span className="title-line">发起一个</span>
+                <span className="title-line start-section__title-accent">项目。</span>
+              </h2>
               <p>把你的空间、真实使用场景和期待告诉瑞客。<br />我们先理解需要解决的问题，<br />再明确这个项目需要实现什么灯光效果。</p>
             </div>
             <form className="project-form reveal-up" onSubmit={handleSubmit}>
