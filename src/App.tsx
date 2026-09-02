@@ -12,12 +12,21 @@ type ProcessStep = {
 
 type PublicationStatus = 'draft' | 'published'
 
+type ProductionProductMedia = {
+  image: string
+  alt: string
+  imageSourceVerified: boolean
+  approvedForPublication: boolean
+  highResolutionVerified: boolean
+}
+
 type ProductMode = {
   title: string
   english: string
   description: string
-  image: string
-  alt: string
+  developmentImage: string
+  developmentAlt: string
+  productionMedia: ProductionProductMedia | null
   status: PublicationStatus
 }
 
@@ -31,6 +40,8 @@ type ProjectArchiveItem = {
   approvedForPublication?: boolean
   metadataVerified?: boolean
   contentReady?: boolean
+  image?: string
+  alt?: string
 }
 
 const navItems = [
@@ -100,32 +111,36 @@ const productModes: ProductMode[] = [
     title: '内嵌固定',
     english: 'RECESSED / FIXED',
     description: '稳定、克制，适合基础与重点照明。',
-    image: '/assets/recessed-light-on.jpeg',
-    alt: '瑞客内嵌灯具开灯效果资料图',
+    developmentImage: '/assets/recessed-light-on.jpeg',
+    developmentAlt: '瑞客内嵌灯具开灯效果开发占位图',
+    productionMedia: null,
     status: 'draft',
   },
   {
     title: '深杯防眩',
     english: 'DEEP ANTI-GLARE',
     description: '见光不见灯，让光柔和地落下，而不是刺向视线。',
-    image: '/assets/recessed-light-off.jpeg',
-    alt: '瑞客深杯防眩灯具资料图',
+    developmentImage: '/assets/recessed-light-off.jpeg',
+    developmentAlt: '瑞客深杯防眩灯具开发占位图',
+    productionMedia: null,
     status: 'draft',
   },
   {
     title: '产品家族',
     english: 'PRODUCT FAMILY',
     description: '以产品架构承接不同空间任务，正式选型以最新技术确认单为准。',
-    image: '/assets/recessed-light-family.jpeg',
-    alt: '瑞客内嵌灯具产品家族资料图',
+    developmentImage: '/assets/recessed-light-family.jpeg',
+    developmentAlt: '瑞客内嵌灯具产品家族开发占位图',
+    productionMedia: null,
     status: 'draft',
   },
   {
     title: '选型资料',
     english: 'SELECTION NOTES',
     description: '参数是选择的工具，不是效果的替代；资料位持续维护中。',
-    image: '/assets/recessed-light-options.png',
-    alt: '瑞客内嵌灯具选型资料图',
+    developmentImage: '/assets/recessed-light-options.png',
+    developmentAlt: '瑞客内嵌灯具选型资料开发占位图',
+    productionMedia: null,
     status: 'draft',
   },
 ]
@@ -138,20 +153,29 @@ const projectArchive: ProjectArchiveItem[] = [
   { id: 'slot-05', className: '', label: 'PROJECT IMAGE / 待补充', status: 'draft' },
 ]
 
-const visibleProjects = isDevelopment
-  ? projectArchive
-  : projectArchive.filter((project) => (
-      project.status === 'published'
-      && project.isRuikeProject === true
-      && project.imageSourceVerified === true
-      && project.approvedForPublication === true
-      && project.metadataVerified === true
-      && project.contentReady === true
-    ))
+const isPublishableProject = (project: ProjectArchiveItem) => (
+  project.status === 'published'
+  && project.isRuikeProject === true
+  && project.imageSourceVerified === true
+  && project.approvedForPublication === true
+  && project.metadataVerified === true
+  && project.contentReady === true
+  && Boolean(project.image)
+  && Boolean(project.alt)
+)
+
+const visibleProjects = isDevelopment ? projectArchive : projectArchive.filter(isPublishableProject)
 
 const visibleProductModes = isDevelopment
   ? productModes
-  : productModes.filter((product) => product.status === 'published')
+  : productModes.filter((product) => (
+      product.status === 'published'
+      && product.productionMedia?.imageSourceVerified === true
+      && product.productionMedia.approvedForPublication === true
+      && product.productionMedia.highResolutionVerified === true
+      && Boolean(product.productionMedia.image)
+      && Boolean(product.productionMedia.alt)
+    ))
 
 function Icon({ name }: { name: IconName }) {
   if (name === 'arrow') {
@@ -209,6 +233,13 @@ function App() {
   const [activeProcess, setActiveProcess] = useState(0)
   const [activeProduct, setActiveProduct] = useState(0)
   const [formStatus, setFormStatus] = useState<'idle' | 'preview'>('idle')
+  const activeProductMode = visibleProductModes[activeProduct]
+  const activeProductImage = activeProductMode
+    ? (isDevelopment ? activeProductMode.developmentImage : activeProductMode.productionMedia?.image)
+    : undefined
+  const activeProductAlt = activeProductMode
+    ? (isDevelopment ? activeProductMode.developmentAlt : activeProductMode.productionMedia?.alt)
+    : undefined
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 32)
@@ -404,32 +435,42 @@ function App() {
           <section className="projects-section section-paper" id="projects">
             <SectionRail number="05" label="PROJECT ARCHIVE" />
             <div className="page-width">
-              <div className="projects-section__header reveal-up">
-                <div>
-                  <p className="section-kicker">真实项目，正在归档</p>
-                  <h2 className="section-title projects-section__title">
-                    <span className="title-line">先把真实</span>
-                    <span className="title-line">留出来。</span>
-                  </h2>
+              {isDevelopment ? (
+                <div className="projects-section__header reveal-up">
+                  <div>
+                    <p className="section-kicker">真实项目，正在归档</p>
+                    <h2 className="section-title projects-section__title">
+                      <span className="title-line">先把真实</span>
+                      <span className="title-line">留出来。</span>
+                    </h2>
+                  </div>
+                  <p className="projects-section__note">
+                    官网当前尚未接入可公开核验的项目影像与项目数据。正式内容接入前，这里保留真实项目位，不以虚构案例填充。
+                  </p>
                 </div>
-                <p className="projects-section__note">
-                  官网当前尚未接入可公开核验的项目影像与项目数据。正式内容接入前，这里保留真实项目位，不以虚构案例填充。
-                </p>
-              </div>
+              ) : null}
               <div className="project-archive-grid">
                 {visibleProjects.map((project) => (
-                  <div className={`project-placeholder ${project.className}`.trim()} key={project.id}>
-                    <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                    <span>{project.label}</span>
+                  <div className={`${project.image ? 'project-image' : 'project-placeholder'} ${project.className}`.trim()} key={project.id}>
+                    {project.image && project.alt ? (
+                      <img src={project.image} alt={project.alt} />
+                    ) : (
+                      <>
+                        <span className="project-placeholder__cross"><Icon name="plus" /></span>
+                        <span>{project.label}</span>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
-              <div className="archive-status">
-                <span>ARCHIVE STATUS</span>
-                <span className="archive-status__line" />
-                <strong>真实内容接入中</strong>
-                <span className="archive-status__code">V1.0 / CONTENT PENDING</span>
-              </div>
+              {isDevelopment ? (
+                <div className="archive-status">
+                  <span>ARCHIVE STATUS</span>
+                  <span className="archive-status__line" />
+                  <strong>真实内容接入中</strong>
+                  <span className="archive-status__code">V1.0 / CONTENT PENDING</span>
+                </div>
+              ) : null}
             </div>
           </section>
         ) : (
@@ -439,15 +480,15 @@ function App() {
         <section className="products-section section-light" id="products">
           <SectionRail number="06" label="PRODUCT AS CARRIER" />
           <div className="page-width products-section__grid">
-            {visibleProductModes.length > 0 ? (
+            {activeProductMode && activeProductImage && activeProductAlt ? (
               <div className="product-media reveal-up">
-                <div className="product-media__main">
-                  <img src={visibleProductModes[activeProduct].image} alt={visibleProductModes[activeProduct].alt} />
+                <div className="product-media__main" data-media-status={isDevelopment ? 'development-placeholder' : 'production-ready'}>
+                  <img src={activeProductImage} alt={activeProductAlt} />
                   <span className="media-index">0{activeProduct + 1} / 0{visibleProductModes.length}</span>
                 </div>
                 <div className="product-media__caption">
-                  <span>PRODUCT MATERIAL / 资料图</span>
-                  <span>正式选型以最新技术确认单为准</span>
+                  <span>{isDevelopment ? 'DEVELOPMENT PLACEHOLDER / 低清资料截图' : 'PRODUCT MATERIAL / 正式高清产品图'}</span>
+                  <span>{isDevelopment ? '正式高清产品图替换位' : '正式选型以最新技术确认单为准'}</span>
                 </div>
               </div>
             ) : null}
