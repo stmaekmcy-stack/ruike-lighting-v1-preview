@@ -25,44 +25,58 @@ const navItems = [
   { label: '关于瑞客', href: '#brand' },
 ]
 
+const showProjectArchive = import.meta.env.DEV
+
 const principles = [
-  { title: '视觉需求', body: '真实活动能够自然完成。', motif: 'beam' },
-  { title: '视觉舒适', body: '人在真实位置，可以稳定观看。', motif: 'soft' },
-  { title: '对象呈现', body: '人物、商品与材料被恰当看见。', motif: 'object' },
-  { title: '空间感知', body: '重点、主次、深度与边界清楚。', motif: 'depth' },
-  { title: '空间氛围', body: '状态与场所、活动和意图相符。', motif: 'ambient' },
+  { title: '视觉需求', body: '真实使用所需的视觉条件是否合适。', motif: 'beam' },
+  { title: '视觉舒适', body: '人能否自然、稳定地观看。', motif: 'soft' },
+  { title: '对象呈现', body: '值得被看见的对象是否呈现恰当。', motif: 'object' },
+  { title: '空间感知', body: '光是否帮助人正确理解空间。', motif: 'depth' },
+  { title: '空间氛围', body: '整体视觉状态是否与场所相符。', motif: 'ambient' },
 ]
 
 const processSteps: ProcessStep[] = [
   {
     number: '01',
-    title: '理解空间',
-    summary: '先理解真实使用，再谈灯具选择。',
-    detail: '从现场信息、空间材质、人的位置与真实活动开始，建立可被验证的灯光任务。',
+    title: '理解期待',
+    summary: '理解客户期待',
+    detail: '理解客户对空间、使用与灯光效果的真实期待。',
   },
   {
     number: '02',
-    title: '形成方案',
-    summary: '把光线、产品与位置放在一起判断。',
-    detail: '以空间任务组织方案，明确重点、层次、舒适和氛围，不用单一参数替代整体判断。',
+    title: '定义效果',
+    summary: '明确效果目标',
+    detail: '将客户期待转化为明确的灯光效果目标。',
   },
   {
     number: '03',
-    title: '选型确认',
-    summary: '规格与配套，在交付前复核。',
-    detail: '围绕型号、功率、尺寸、开孔、色温、显色、光束角及配套清单完成技术复核。',
+    title: '灯光设计',
+    summary: '围绕目标完成设计',
+    detail: '围绕已经明确的效果目标形成灯光设计。',
   },
   {
     number: '04',
-    title: '调试交付',
-    summary: '真实位置、真实视线、真实对象。',
-    detail: '图纸完成、产品到场、安装完成，都不等于效果完成；最终需要回到真实空间进行调试。',
+    title: '产品匹配',
+    summary: '匹配产品与技术条件',
+    detail: '根据效果目标匹配产品、配光、控制及相应技术条件。',
   },
   {
     number: '05',
-    title: '结果验收',
-    summary: '让每一束光落到空间结果上。',
-    detail: '以视觉需求、舒适、对象呈现、空间感知和空间氛围作为验收时的共同语言。',
+    title: '现场落地',
+    summary: '在真实现场落地',
+    detail: '将灯光设计与产品能力落实到真实空间。',
+  },
+  {
+    number: '06',
+    title: '专业调试',
+    summary: '完成专业调试',
+    detail: '在真实空间与实际使用、观看条件下完成专业调试。',
+  },
+  {
+    number: '07',
+    title: '效果验收',
+    summary: '确认约定效果',
+    detail: '对约定的灯光效果进行专业验收。',
   },
 ]
 
@@ -211,7 +225,7 @@ function App() {
           <div className="hero__edge-fade" />
           <SectionRail number="01" label="LIGHT AS RESULT" light />
           <div className="hero__content page-width">
-            <p className="hero__location">RUIKE LIGHTING / 2026</p>
+            <p className="hero__location">灯光效果交付品牌 / 效果保障</p>
             <h1>
               让好灯光
               <br />
@@ -238,17 +252,17 @@ function App() {
             <div className="brand-section__headline reveal-up">
               <p className="section-kicker">灯光效果交付品牌</p>
               <h2>
-                灯光不是
+                光，
                 <br />
-                <em>装饰。</em>
+                是空间的
                 <br />
-                是空间的结果。
+                <em>第二次塑造。</em>
               </h2>
             </div>
             <div className="brand-section__body reveal-up">
               <p className="display-quote">不止卖灯，效果交付。</p>
               <p className="body-copy">
-                瑞客以专业产品、灯光效果与交付协同，让每一束光都落到空间结果上。我们关注的不是灯具被安装在哪里，而是人在真实空间里看见了什么、感受了什么。
+                灯光效果，是灯光在真实空间以及实际使用、观看条件下最终形成并被人感知到的视觉结果。
               </p>
               <a className="text-link" href="#standard">
                 了解瑞客的判断标准 <Icon name="arrow" />
@@ -258,18 +272,18 @@ function App() {
           <div className="page-width brand-section__principles">
             <div className="open-principle">
               <span>01</span>
-              <strong>理解空间</strong>
-              <small>先有真实任务，再谈产品选择。</small>
+              <strong>专业定义效果</strong>
+              <small>理解客户期待，并转译为明确的灯光效果目标。</small>
             </div>
             <div className="open-principle">
               <span>02</span>
-              <strong>控制光线</strong>
-              <small>让重点、层次与舒适被同时照顾。</small>
+              <strong>产品承载效果</strong>
+              <small>通过合适的产品、光学与技术能力实现设计意图。</small>
             </div>
             <div className="open-principle">
               <span>03</span>
-              <strong>交付结果</strong>
-              <small>回到真实位置，完成调试与验收。</small>
+              <strong>交付兑现效果</strong>
+              <small>从方案到现场、调试和验收，对最终结果负责。</small>
             </div>
           </div>
         </section>
@@ -280,7 +294,7 @@ function App() {
             <div className="standard-section__intro reveal-up">
               <p className="section-kicker section-kicker--light">RUIKE GOOD LIGHT</p>
               <h2>什么样的灯光，才叫好？</h2>
-              <p>用五个真实观察面，替代只看参数的单一判断。</p>
+              <p>瑞客用五个相互关联的质量观察面判断好灯光效果，不以单一参数代替整体判断。</p>
             </div>
             <div className="principle-list">
               {principles.map((principle, index) => (
@@ -306,10 +320,14 @@ function App() {
           <div className="page-width">
             <div className="process-section__header reveal-up">
               <div>
-                <p className="section-kicker">从理解空间，到交付效果</p>
-                <h2>光的秩序，<br />要经过现场。</h2>
+                <p className="section-kicker">效果目标先于产品选择</p>
+                <h2 className="process-section__judgements">
+                  图纸完成 ≠ 效果完成<br />
+                  产品到场 ≠ 效果完成<br />
+                  安装完成 ≠ 效果完成
+                </h2>
               </div>
-              <p className="process-section__note">图纸完成、产品到场、安装完成，都不等于效果完成。</p>
+              <p className="process-section__note">只有约定的灯光效果在真实空间中被合理实现，并通过专业调试与效果验收，才构成完整效果交付。</p>
             </div>
             <div className="process-line" aria-label="效果交付流程">
               {processSteps.map((step, index) => (
@@ -336,48 +354,50 @@ function App() {
           </div>
         </section>
 
-        <section className="projects-section section-paper" id="projects">
-          <SectionRail number="05" label="PROJECT ARCHIVE" />
-          <div className="page-width">
-            <div className="projects-section__header reveal-up">
-              <div>
-                <p className="section-kicker">真实项目，正在归档</p>
-                <h2>先把真实<br />留出来。</h2>
+        {showProjectArchive && (
+          <section className="projects-section section-paper" id="projects">
+            <SectionRail number="05" label="PROJECT ARCHIVE" />
+            <div className="page-width">
+              <div className="projects-section__header reveal-up">
+                <div>
+                  <p className="section-kicker">真实项目，正在归档</p>
+                  <h2>先把真实<br />留出来。</h2>
+                </div>
+                <p className="projects-section__note">
+                  官网当前尚未接入可公开核验的项目影像与项目数据。正式内容接入前，这里保留真实项目位，不以虚构案例填充。
+                </p>
               </div>
-              <p className="projects-section__note">
-                官网当前尚未接入可公开核验的项目影像与项目数据。正式内容接入前，这里保留真实项目位，不以虚构案例填充。
-              </p>
+              <div className="project-archive-grid">
+                <div className="project-placeholder project-placeholder--tall">
+                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
+                  <span>PROJECT IMAGE / 待补充真实项目影像</span>
+                </div>
+                <div className="project-placeholder project-placeholder--tall project-placeholder--warm">
+                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
+                  <span>PROJECT IMAGE / 待补充真实项目影像</span>
+                </div>
+                <div className="project-placeholder project-placeholder--wide">
+                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
+                  <span>PROJECT IMAGE / 待补充真实项目影像</span>
+                </div>
+                <div className="project-placeholder">
+                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
+                  <span>PROJECT IMAGE / 待补充</span>
+                </div>
+                <div className="project-placeholder">
+                  <span className="project-placeholder__cross"><Icon name="plus" /></span>
+                  <span>PROJECT IMAGE / 待补充</span>
+                </div>
+              </div>
+              <div className="archive-status">
+                <span>ARCHIVE STATUS</span>
+                <span className="archive-status__line" />
+                <strong>真实内容接入中</strong>
+                <span className="archive-status__code">V1.0 / CONTENT PENDING</span>
+              </div>
             </div>
-            <div className="project-archive-grid">
-              <div className="project-placeholder project-placeholder--tall">
-                <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                <span>PROJECT IMAGE / 待补充真实项目影像</span>
-              </div>
-              <div className="project-placeholder project-placeholder--tall project-placeholder--warm">
-                <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                <span>PROJECT IMAGE / 待补充真实项目影像</span>
-              </div>
-              <div className="project-placeholder project-placeholder--wide">
-                <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                <span>PROJECT IMAGE / 待补充真实项目影像</span>
-              </div>
-              <div className="project-placeholder">
-                <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                <span>PROJECT IMAGE / 待补充</span>
-              </div>
-              <div className="project-placeholder">
-                <span className="project-placeholder__cross"><Icon name="plus" /></span>
-                <span>PROJECT IMAGE / 待补充</span>
-              </div>
-            </div>
-            <div className="archive-status">
-              <span>ARCHIVE STATUS</span>
-              <span className="archive-status__line" />
-              <strong>真实内容接入中</strong>
-              <span className="archive-status__code">V1.0 / CONTENT PENDING</span>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <section className="products-section section-light" id="products">
           <SectionRail number="06" label="PRODUCT AS CARRIER" />
@@ -393,9 +413,9 @@ function App() {
               </div>
             </div>
             <div className="products-section__content reveal-up">
-              <p className="section-kicker">产品只是载体</p>
-              <h2>一套产品，<br />回应不同空间任务。</h2>
-              <p className="body-copy">从基础照明到重点照明，再到线性与磁吸系统，以空间任务而不是单一参数组织选型。</p>
+              <p className="section-kicker">产品，是实现效果的载体。</p>
+              <h2 className="products-section__headline">为不同效果任务，<br />匹配合适的产品能力。</h2>
+              <p className="body-copy">先明确需要实现什么灯光效果，再确定配光、产品、控制及相应技术条件。</p>
               <div className="product-index">
                 {productModes.map((product, index) => (
                   <button
@@ -424,7 +444,7 @@ function App() {
             <div className="start-section__intro reveal-up">
               <p className="section-kicker section-kicker--light">START WITH SPACE</p>
               <h2>发起一个<br /><span>项目。</span></h2>
-              <p>告诉我们空间正在发生什么。<br />从真实问题开始，一起把光落到结果上。</p>
+              <p>把你的空间、真实使用场景和期待告诉瑞客。<br />我们先理解需要解决的问题，<br />再明确这个项目需要实现什么灯光效果。</p>
             </div>
             <form className="project-form reveal-up" onSubmit={handleSubmit}>
               <label>

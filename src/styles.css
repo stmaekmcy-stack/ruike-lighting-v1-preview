@@ -153,9 +153,10 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .process-section { min-height: 860px; padding: 168px 0 120px; }
 .process-section__header { display: flex; align-items: end; justify-content: space-between; gap: 60px; }
 .process-section h2 { font-size: clamp(48px, 6.5vw, 94px); }
+.process-section h2.process-section__judgements { font-size: clamp(38px, 4.6vw, 66px); line-height: 1.14; }
 .process-section__note { max-width: 230px; margin: 0 0 8px; color: var(--muted); font-size: 12px; line-height: 1.8; }
-.process-line { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; margin-top: 120px; }
-.process-line::before { position: absolute; top: 6px; right: 11%; left: 3%; height: 1px; background: rgba(18, 20, 20, 0.25); content: ""; }
+.process-line { position: relative; display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-top: 120px; }
+.process-line::before { position: absolute; top: 6px; right: 5%; left: 3%; height: 1px; background: rgba(18, 20, 20, 0.25); content: ""; }
 .process-node { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 13px; padding: 0 0 18px; border: 0; color: var(--muted); background: transparent; text-align: left; }
 .process-node__dot { z-index: 1; width: 12px; height: 12px; border: 1px solid currentColor; border-radius: 50%; background: var(--paper); transition: border-color 200ms ease, background 200ms ease, box-shadow 200ms ease; }
 .process-node__number { margin-top: 26px; color: var(--gold); font-family: "DM Mono", monospace; font-size: 10px; }
@@ -193,6 +194,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .media-index { position: absolute; right: 18px; bottom: 16px; color: var(--gold-soft); font-family: "DM Mono", monospace; font-size: 10px; letter-spacing: 0.1em; }
 .product-media__caption { display: flex; justify-content: space-between; gap: 20px; padding-top: 14px; color: var(--muted); font-family: "DM Mono", monospace; font-size: 8px; letter-spacing: 0.06em; }
 .products-section h2 { font-size: clamp(45px, 5.7vw, 84px); }
+.products-section h2.products-section__headline { font-size: clamp(42px, 4vw, 58px); }
 .products-section__content .body-copy { margin: 34px 0 42px; }
 .product-index { border-top: 1px solid var(--line); }
 .product-index__item { display: grid; grid-template-columns: 40px 1fr 22px; gap: 16px; align-items: center; width: 100%; padding: 17px 0; border: 0; border-bottom: 1px solid var(--line); color: var(--muted); background: transparent; text-align: left; transition: color 200ms ease, padding 200ms ease; }
@@ -280,6 +282,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
   .principle p { max-width: none; }
   .process-section__header, .projects-section__header { display: block; }
   .process-section__note, .projects-section__note { margin-top: 34px; }
+  .process-section h2.process-section__judgements { font-size: clamp(30px, 9vw, 38px); line-height: 1.2; }
   .process-line { display: block; margin-top: 66px; padding-left: 20px; }
   .process-line::before { top: 2px; bottom: 14px; left: 25px; width: 1px; height: auto; }
   .process-node { flex-direction: row; align-items: center; gap: 14px; width: 100%; padding: 0 0 31px; }
@@ -303,6 +306,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
   .product-media__caption span { display: block; }
   .product-media__caption span + span { margin-top: 5px; }
   .products-section__content .body-copy { margin: 27px 0 33px; }
+  .products-section h2.products-section__headline { font-size: clamp(36px, 10.5vw, 46px); }
   .start-section { padding-bottom: 0; }
   .start-section__ambient { width: 100%; height: 56%; opacity: 0.5; }
   .start-section__intro > p:last-child { margin-top: 29px; }
