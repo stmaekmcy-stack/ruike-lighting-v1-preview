@@ -1,0 +1,117 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_ref:
+        description: Git commit or tag to deploy
+        required: true
+        default: main
+      confirmation:
+        description: Type CONFIRM-RUIKE-PRODUCTION after final approval
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ruike-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: build-deploy-verify
+    if: inputs.confirmation == 'CONFIRM-RUIKE-PRODUCTION'
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      VITE_DEPLOYMENT_TARGET: production
+      VITE_BASE_PATH: /
+      VITE_SITE_URL: ${{ vars.PRODUCTION_SITE_URL }}
+      VITE_ALLOW_INDEXING: ${{ vars.PRODUCTION_ALLOW_INDEXING }}
+      VITE_PROJECT_FORM_ENDPOINT: ${{ vars.PROJECT_FORM_ENDPOINT }}
+      VITE_COMPANY_PHONE: ${{ vars.COMPANY_PHONE }}
+      VITE_WECHAT_ID: ${{ vars.COMPANY_WECHAT_ID }}
+      VITE_COMPANY_EMAIL: ${{ vars.COMPANY_EMAIL }}
+      SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+      SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
+      SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+      SSH_PRIVATE_KEY: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.PRODUCTION_SSH_KNOWN_HOSTS }}
+    steps:
+      - name: Check out approved release
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_ref }}
+          fetch-depth: 0
+      - name: Resolve approved release commit
+        id: release
+        run: |
+          release_sha="$(git rev-parse HEAD)"
+          git merge-base --is-ancestor "$release_sha" origin/main
+          printf 'sha=%s\n' "$release_sha" >> "$GITHUB_OUTPUT"
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Validate production configuration
+        run: |
+          test -n "$VITE_SITE_URL"
+          test "${VITE_SITE_URL#https://}" != "$VITE_SITE_URL"
+          case "$VITE_SITE_URL" in
+            *localhost*|*127.0.0.1*|*.github.io/*|*example.com/*) exit 1 ;;
+          esac
+          test -n "$SSH_HOST"
+          test -n "$SSH_USER"
+          test -n "$SSH_PRIVATE_KEY"
+          test -n "$SSH_KNOWN_HOSTS"
+      - name: Build and test release
+        run: |
+          npm ci
+          npm run check
+          npm prune --omit=dev
+      - name: Package immutable release
+        env:
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          mkdir -p release
+          cp -R dist server node_modules package.json package-lock.json release/
+          tar -C release -czf "ruike-${RELEASE_SHA}.tar.gz" .
+          sha256sum "ruike-${RELEASE_SHA}.tar.gz" > "ruike-${RELEASE_SHA}.sha256"
+      - name: Configure verified SSH host
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+      - name: Upload and activate release
+        id: activate
+        env:
+          RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: |
+          port="${SSH_PORT:-22}"
+          lead_service_enabled=false
+          if [ -n "$VITE_PROJECT_FORM_ENDPOINT" ]; then
+            lead_service_enabled=true
+          fi
+          scp -P "$port" "ruike-${RELEASE_SHA}.tar.gz" "ruike-${RELEASE_SHA}.sha256" "$SSH_USER@$SSH_HOST:/tmp/"
+          ssh -p "$port" "$SSH_USER@$SSH_HOST" "cd /tmp && sha256sum --check 'ruike-${RELEASE_SHA}.sha256' && sudo /usr/local/sbin/ruike-activate-release '${RELEASE_SHA}' '/tmp/ruike-${RELEASE_SHA}.tar.gz' '${lead_service_enabled}' && rm -f '/tmp/ruike-${RELEASE_SHA}.sha256'"
+      - name: Verify HTTPS and homepage health
+        run: |
+          curl --fail --show-error --silent --location --max-time 20 "$VITE_SITE_URL" > /dev/null
+          curl --fail --show-error --silent --max-time 10 "${VITE_SITE_URL%/}/healthz" | grep -q '"status":"ok"'
+      - name: Roll back when external verification fails
+        if: failure() && steps.activate.outcome == 'success'
+        run: |
+          port="${SSH_PORT:-22}"
+          ssh -p "$port" "$SSH_USER@$SSH_HOST" "sudo /usr/local/sbin/ruike-rollback-release"
+      - name: Upload release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ruike-production-${{ steps.release.outputs.sha }}
+          path: |
+            ruike-${{ steps.release.outputs.sha }}.sha256
+          retention-days: 90

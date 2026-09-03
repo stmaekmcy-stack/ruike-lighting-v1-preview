@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Run as root." >&2
+  exit 1
+fi
+
+release_root="/srv/ruike-lighting/releases"
+current_link="/srv/ruike-lighting/current"
+previous_link="/srv/ruike-lighting/previous"
+
+current_target="$(readlink -f "$current_link")"
+previous_target="$(readlink -f "$previous_link")"
+
+if [[ "$current_target" != "$release_root/"* ]] || [[ "$previous_target" != "$release_root/"* ]] || [ ! -d "$previous_target" ]; then
+  echo "A valid previous release is not available." >&2
+  exit 1
+fi
+
+ln -sfn "$previous_target" "${current_link}.next"
+mv -Tf "${current_link}.next" "$current_link"
+ln -sfn "$current_target" "$previous_link"
+
+lead_service_enabled="false"
+if [ -f "$previous_target/.lead-service-enabled" ]; then
+  lead_service_enabled="$(sed -n '1p' "$previous_target/.lead-service-enabled")"
+fi
+
+if [ "$lead_service_enabled" = "true" ]; then
+  systemctl restart ruike-lead.service
+  curl --fail --silent --max-time 5 http://127.0.0.1:8787/healthz >/dev/null
+else
+  systemctl stop ruike-lead.service || true
+fi
+
+nginx -t
+systemctl reload nginx
+echo "Rolled back to $(basename "$previous_target")"

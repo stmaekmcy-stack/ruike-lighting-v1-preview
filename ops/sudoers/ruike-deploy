@@ -1,0 +1,2 @@
+ruike-deploy ALL=(root) NOPASSWD: /usr/local/sbin/ruike-activate-release *
+ruike-deploy ALL=(root) NOPASSWD: /usr/local/sbin/ruike-rollback-release

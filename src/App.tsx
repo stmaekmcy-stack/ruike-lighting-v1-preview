@@ -15,6 +15,7 @@ type ProcessStep = {
 type PublishStatus = 'draft' | 'published'
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'error'
+type CopyStatus = 'idle' | 'success' | 'error'
 
 type ProductionProductMedia = {
   image: string
@@ -269,7 +270,11 @@ function App() {
   const [activeProcess, setActiveProcess] = useState(0)
   const [activeProduct, setActiveProduct] = useState(0)
   const [formStatus, setFormStatus] = useState<FormStatus>('idle')
+  const [formMessage, setFormMessage] = useState('')
+  const [wechatCopyStatus, setWechatCopyStatus] = useState<CopyStatus>('idle')
   const wechatQrRef = useRef<HTMLImageElement>(null)
+  const formStartedAtRef = useRef<number | null>(null)
+  const copyResetTimeoutRef = useRef<number | null>(null)
   const activeProductMode = visibleProductModes[activeProduct]
   const activeProductImagePath = activeProductMode
     ? (isDevelopment ? activeProductMode.developmentImage : activeProductMode.productionMedia?.image)
@@ -285,6 +290,7 @@ function App() {
 
   useEffect(() => {
     trackEventOnce('view_home')
+    formStartedAtRef.current = Date.now()
   }, [])
 
   useEffect(() => {
@@ -292,6 +298,26 @@ function App() {
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    if (!menuOpen) return
+
+    const previousOverflow = document.body.style.overflow
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMenuOpen(false)
+    }
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [menuOpen])
+
+  useEffect(() => () => {
+    if (copyResetTimeoutRef.current !== null) window.clearTimeout(copyResetTimeoutRef.current)
   }, [])
 
   useEffect(() => {
@@ -320,12 +346,40 @@ function App() {
     setMenuOpen(false)
   }
 
+  const handleCopyWechat = async () => {
+    if (!companyConfig.wechatId) return
+
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(companyConfig.wechatId)
+      } else {
+        const textArea = document.createElement('textarea')
+        textArea.value = companyConfig.wechatId
+        textArea.setAttribute('readonly', '')
+        textArea.style.position = 'fixed'
+        textArea.style.opacity = '0'
+        document.body.appendChild(textArea)
+        textArea.select()
+        const copied = document.execCommand('copy')
+        textArea.remove()
+        if (!copied) throw new Error('Copy command failed')
+      }
+      setWechatCopyStatus('success')
+    } catch {
+      setWechatCopyStatus('error')
+    }
+
+    if (copyResetTimeoutRef.current !== null) window.clearTimeout(copyResetTimeoutRef.current)
+    copyResetTimeoutRef.current = window.setTimeout(() => setWechatCopyStatus('idle'), 3_000)
+  }
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     const form = event.currentTarget
 
     if (!formEnabled) {
       setFormStatus('error')
+      setFormMessage('在线表单尚未开放，请通过电话或微信联系瑞客。')
       trackEvent('submit_lead_error', { source: 'project_form', reason: 'unconfigured' })
       return
     }
@@ -333,6 +387,7 @@ function App() {
     if (!form.checkValidity()) {
       form.reportValidity()
       setFormStatus('error')
+      setFormMessage('请检查并补充必填信息。')
       trackEvent('submit_lead_error', { source: 'project_form', reason: 'validation' })
       return
     }
@@ -355,11 +410,13 @@ function App() {
 
     if (payload.name.length < 2 || payload.contact.length < 4) {
       setFormStatus('error')
+      setFormMessage('请检查并补充称呼与联系方式。')
       trackEvent('submit_lead_error', { source: 'project_form', reason: 'validation' })
       return
     }
 
     setFormStatus('submitting')
+    setFormMessage('正在安全提交项目信息…')
 
     try {
       if (isDevelopment) {
@@ -371,27 +428,85 @@ function App() {
         try {
           const response = await fetch(formEndpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload),
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Ruike-Form': 'website-v1',
+            },
+            body: JSON.stringify({
+              ...payload,
+              website: honeypot,
+              startedAt: formStartedAtRef.current ?? Date.now(),
+            }),
             signal: controller.signal,
           })
-          if (!response.ok) throw new Error('Project request failed')
+          if (!response.ok) {
+            const responseBody = await response.json().catch(() => null) as { message?: string } | null
+            throw new Error(responseBody?.message || '暂未提交成功，请稍后重试，或直接通过电话、微信联系瑞客。')
+          }
         } finally {
           window.clearTimeout(timeoutId)
         }
       }
 
       form.reset()
+      formStartedAtRef.current = Date.now()
       setFormStatus('success')
+      setFormMessage('项目信息已收到。瑞客会根据你提供的情况进一步了解项目。')
       trackEvent('submit_lead_success', { source: 'project_form' })
-    } catch {
+    } catch (error) {
       setFormStatus('error')
+      setFormMessage(error instanceof Error && error.message.startsWith('提交')
+        ? error.message
+        : '暂未提交成功，请稍后重试，或直接通过电话、微信联系瑞客。')
       trackEvent('submit_lead_error', {
         source: 'project_form',
         reason: isDevelopment && simulateFormFailure ? 'simulated' : 'network',
       })
     }
   }
+
+  const contactFallback = wechatQr || phoneHref || companyConfig.email ? (
+    <div className={`form-contact-fallback ${wechatQr ? '' : 'form-contact-fallback--text-only'}`.trim()}>
+      {wechatQr ? (
+        <img
+          ref={wechatQrRef}
+          src={wechatQr}
+          alt={`${companyConfig.wechat ?? companyConfig.companyName}二维码`}
+          width="344"
+          height="344"
+          loading="lazy"
+          decoding="async"
+        />
+      ) : null}
+      <div>
+        {companyConfig.wechat ? <strong>{companyConfig.wechat}</strong> : null}
+        <p>请通过以下官方渠道发起项目沟通。</p>
+        {companyConfig.wechatId ? (
+          <div className="wechat-copy">
+            <span>微信号：{companyConfig.wechatId}</span>
+            <button type="button" onClick={handleCopyWechat}>
+              {wechatCopyStatus === 'success' ? '已复制' : '复制微信号'}
+            </button>
+            {wechatCopyStatus !== 'idle' ? (
+              <small className={`wechat-copy__status wechat-copy__status--${wechatCopyStatus}`} role="status" aria-live="polite">
+                {wechatCopyStatus === 'success' ? '微信号已复制' : '复制失败，请长按微信号复制'}
+              </small>
+            ) : null}
+          </div>
+        ) : null}
+        {companyConfig.phone && phoneHref ? (
+          <a
+            href={phoneHref}
+            onClick={() => trackEvent('click_phone', { source: 'contact' })}
+          >
+            电话：{companyConfig.phone}
+          </a>
+        ) : null}
+        {companyConfig.email ? <a href={`mailto:${companyConfig.email}`}>{companyConfig.email}</a> : null}
+        {companyConfig.address ? <address>{companyConfig.address}</address> : null}
+      </div>
+    </div>
+  ) : null
 
   return (
     <div className="site-shell">
@@ -406,7 +521,7 @@ function App() {
             <small>RUIKE LIGHTING</small>
           </span>
         </a>
-        <nav className={`main-nav ${menuOpen ? 'main-nav--open' : ''}`} aria-label="主导航">
+        <nav id="primary-navigation" className={`main-nav ${menuOpen ? 'main-nav--open' : ''}`} aria-label="主导航">
           {visibleNavItems.map((item) => (
             <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>
               {item.label}
@@ -419,6 +534,7 @@ function App() {
         <button
           className="menu-toggle"
           type="button"
+          aria-controls="primary-navigation"
           aria-label={menuOpen ? '关闭菜单' : '打开菜单'}
           aria-expanded={menuOpen}
           onClick={() => setMenuOpen((open) => !open)}
@@ -429,12 +545,17 @@ function App() {
 
       <main>
         <section className="hero" id="top">
-          <div
-            className="hero__image"
-            role="img"
-            aria-label="建筑空间中暖光沿墙面与地面展开"
-            style={{ backgroundImage: `url(${withBasePath('assets/hero-architecture.png')})` }}
-          />
+          <picture className="hero__image">
+            <source srcSet={withBasePath('assets/hero-architecture.webp')} type="image/webp" />
+            <img
+              src={withBasePath('assets/hero-architecture.png')}
+              alt="建筑空间中暖光沿墙面与地面展开"
+              width="1672"
+              height="941"
+              fetchPriority="high"
+              decoding="async"
+            />
+          </picture>
           <div className="hero__edge-fade" />
           <SectionRail number="01" label="LIGHT AS RESULT" light />
           <div className="hero__content page-width">
@@ -680,7 +801,8 @@ function App() {
               </h2>
               <p>把你的空间、真实使用场景和期待告诉瑞客。<br />我们先理解需要解决的问题，<br />再明确这个项目需要实现什么灯光效果。</p>
             </div>
-            <form className="project-form reveal-up" onSubmit={handleSubmit} noValidate aria-disabled={!formEnabled}>
+            {formEnabled ? (
+            <form className="project-form reveal-up" onSubmit={handleSubmit} noValidate>
               <label>
                 <span>称呼</span>
                 <input name="name" placeholder="怎么称呼您" autoComplete="name" minLength={2} maxLength={60} required disabled={!formEnabled} />
@@ -691,7 +813,7 @@ function App() {
               </label>
               <label>
                 <span>空间类型</span>
-                <select name="space" defaultValue="" disabled={!formEnabled}>
+                <select name="space" defaultValue="" required>
                   <option value="" disabled>请选择空间类型</option>
                   <option value="residential">居住空间</option>
                   <option value="commercial">商业空间</option>
@@ -701,43 +823,21 @@ function App() {
               </label>
               <label>
                 <span>项目描述</span>
-                <textarea name="brief" placeholder="空间位置、阶段或正在遇到的问题" rows={3} maxLength={1200} disabled={!formEnabled} />
+                <textarea name="brief" placeholder="空间位置、阶段或正在遇到的问题" rows={3} minLength={8} maxLength={1200} required />
               </label>
               <label className="form-honeypot" aria-hidden="true">
                 <span>网站</span>
                 <input name="website" tabIndex={-1} autoComplete="off" disabled={!formEnabled} />
               </label>
-              {!formEnabled && wechatQr ? (
-                <div className="form-contact-fallback">
-                  <img ref={wechatQrRef} src={wechatQr} alt={`${companyConfig.wechat ?? companyConfig.companyName}二维码`} />
-                  <div>
-                    <strong>{companyConfig.wechat ?? '瑞客官方微信'}</strong>
-                    <p>线上项目表单尚未接通，请扫描二维码进入微信端。</p>
-                    {companyConfig.phone && phoneHref ? (
-                      <a
-                        href={phoneHref}
-                        onClick={() => trackEvent('click_phone', { source: 'contact' })}
-                      >
-                        {companyConfig.phone}
-                      </a>
-                    ) : null}
-                    {companyConfig.email ? <a href={`mailto:${companyConfig.email}`}>{companyConfig.email}</a> : null}
-                    {companyConfig.address ? <address>{companyConfig.address}</address> : null}
-                  </div>
-                </div>
-              ) : null}
-              <button className="button button--outline-light" type="submit" disabled={!formEnabled || formStatus === 'submitting'}>
-                {!formEnabled ? '在线表单暂未开放' : formStatus === 'submitting' ? '正在提交' : '提交项目需求'} <Icon name="arrow" />
+              <button className="button button--outline-light" type="submit" disabled={formStatus === 'submitting'}>
+                {formStatus === 'submitting' ? '正在提交' : '提交项目需求'} <Icon name="arrow" />
               </button>
               {formStatus !== 'idle' ? (
                 <p className={`form-status form-status--${formStatus}`} role="status" aria-live="polite">
-                  {formStatus === 'success'
-                    ? '项目信息已收到。瑞客会根据你提供的情况进一步了解项目。'
-                    : formStatus === 'error'
-                      ? '暂未提交成功。请检查必填信息，或稍后重试。'
-                      : '正在安全提交项目信息…'}
+                  {formMessage}
                 </p>
               ) : null}
+              {contactFallback}
               <p className="form-note form-consent">
                 提交即表示你同意瑞客仅为项目沟通目的处理你主动提供的信息。
                 <a href={withBasePath('privacy.html')}>隐私说明</a>
@@ -745,6 +845,11 @@ function App() {
               </p>
               {isDevelopment ? <p className="form-note form-development-note">开发环境使用模拟提交；生产环境仅在配置真实接收端后启用。</p> : null}
             </form>
+            ) : (
+              <div className="project-form project-form--contact-only reveal-up">
+                {contactFallback}
+              </div>
+            )}
           </div>
           <footer className="page-width site-footer">
             <a className="brand-lockup brand-lockup--footer" href="#top">
