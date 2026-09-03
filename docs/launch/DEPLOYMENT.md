@@ -28,6 +28,8 @@ GitHub Actions 测试、构建、打包、校验和
 | `COMPANY_PHONE` | 真实对外电话；缺失时留空 |
 | `COMPANY_WECHAT_ID` | 真实对外微信号；缺失时留空 |
 | `COMPANY_EMAIL` | 真实对外邮箱；缺失时留空 |
+| `COMPANY_LEGAL_NAME` | 与营业执照逐字核验后的企业全称；未核验时留空 |
+| `COMPANY_ADDRESS` | 经企业确认可公开的真实地址；未确认时留空 |
 
 ### Secrets
 
@@ -79,23 +81,31 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    sudo visudo -cf /etc/sudoers.d/ruike-deploy
    ```
 
-5. DNS A/CNAME 生效后，为主域名与 `www` 申请证书：
+5. DNS A/CNAME 生效后，为主域名、`www` 与 `.cn` 保护域名申请同一张证书：
 
    ```bash
-   RUIKE_PRIMARY_DOMAIN=ruikelighting.com
-   RUIKE_WWW_DOMAIN=www.ruikelighting.com
+   RUIKE_PRIMARY_DOMAIN=ruikelight.com
+   RUIKE_WWW_DOMAIN=www.ruikelight.com
+   RUIKE_CN_DOMAIN=ruikelight.cn
+   RUIKE_CN_WWW_DOMAIN=www.ruikelight.cn
    sudo systemctl stop nginx
-   sudo certbot certonly --standalone -d "$RUIKE_PRIMARY_DOMAIN" -d "$RUIKE_WWW_DOMAIN"
+   sudo certbot certonly --standalone \
+     -d "$RUIKE_PRIMARY_DOMAIN" -d "$RUIKE_WWW_DOMAIN" \
+     -d "$RUIKE_CN_DOMAIN" -d "$RUIKE_CN_WWW_DOMAIN"
    sudo systemctl start nginx
    ```
 
 6. 生成 Nginx 正式配置，确认无任何占位符后启用：
 
    ```bash
-   RUIKE_PRIMARY_DOMAIN=ruikelighting.com
-   RUIKE_WWW_DOMAIN=www.ruikelighting.com
+   RUIKE_PRIMARY_DOMAIN=ruikelight.com
+   RUIKE_WWW_DOMAIN=www.ruikelight.com
+   RUIKE_CN_DOMAIN=ruikelight.cn
+   RUIKE_CN_WWW_DOMAIN=www.ruikelight.cn
    sed -e "s/__PRIMARY_DOMAIN__/$RUIKE_PRIMARY_DOMAIN/g" \
        -e "s/__WWW_DOMAIN__/$RUIKE_WWW_DOMAIN/g" \
+       -e "s/__CN_DOMAIN__/$RUIKE_CN_DOMAIN/g" \
+       -e "s/__CN_WWW_DOMAIN__/$RUIKE_CN_WWW_DOMAIN/g" \
        ops/nginx/ruike-lighting.conf.template > /tmp/ruike-lighting.conf
    grep -q '__' /tmp/ruike-lighting.conf && exit 1 || true
    sudo install -m 0644 /tmp/ruike-lighting.conf /etc/nginx/sites-available/ruike-lighting.conf
@@ -140,8 +150,9 @@ sudo /usr/local/sbin/ruike-rollback-release
 回滚后验收：
 
 ```bash
-curl --fail --silent https://ruikelighting.com/ > /dev/null
-curl --fail --silent https://ruikelighting.com/healthz
+curl --fail --silent https://ruikelight.com/ > /dev/null
+curl --fail --silent https://ruikelight.com/healthz
+curl --head --silent https://ruikelight.cn/ | grep -i '^location: https://ruikelight.com/'
 readlink -f /srv/ruike-lighting/current
 ```
 

@@ -16,12 +16,12 @@ const publicValue = (value: string | undefined) => value?.trim() || null
 
 export const companyConfig: CompanyConfig = {
   companyName: '瑞客照明',
-  legalCompanyName: '上海瑞客莱照明有限公司',
+  legalCompanyName: publicValue(import.meta.env.VITE_COMPANY_LEGAL_NAME),
   phone: publicValue(import.meta.env.VITE_COMPANY_PHONE),
   wechat: '瑞客照明官方微信公众号',
   wechatId: publicValue(import.meta.env.VITE_WECHAT_ID),
   email: publicValue(import.meta.env.VITE_COMPANY_EMAIL),
-  address: '上海市奉贤区金大公路 8218 号 1 幢',
+  address: publicValue(import.meta.env.VITE_COMPANY_ADDRESS),
   wechatQr: 'assets/ruike-wechat-official.jpg',
   businessHours: null,
   icpNumber: null,

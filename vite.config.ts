@@ -23,6 +23,8 @@ export default defineConfig(({ mode }) => {
   const allowIndexing = env.VITE_ALLOW_INDEXING === 'true'
   const publicPhone = env.VITE_COMPANY_PHONE?.trim()
   const publicEmail = env.VITE_COMPANY_EMAIL?.trim()
+  const publicLegalName = env.VITE_COMPANY_LEGAL_NAME?.trim()
+  const publicAddress = env.VITE_COMPANY_ADDRESS?.trim()
   const formEndpoint = env.VITE_PROJECT_FORM_ENDPOINT?.trim()
   const hostname = new URL(siteUrl).hostname
   const isReservedHostname = hostname === 'localhost'
@@ -66,8 +68,8 @@ export default defineConfig(({ mode }) => {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: '瑞客照明',
-    legalName: '上海瑞客莱照明有限公司',
     url: siteUrl,
+    ...(publicLegalName ? { legalName: publicLegalName } : {}),
     ...(publicEmail ? { email: publicEmail } : {}),
     ...(publicPhone ? {
       contactPoint: {
@@ -77,13 +79,13 @@ export default defineConfig(({ mode }) => {
         availableLanguage: 'zh-CN',
       },
     } : {}),
-    address: {
-      '@type': 'PostalAddress',
-      streetAddress: '金大公路 8218 号 1 幢',
-      addressLocality: '上海市',
-      addressRegion: '奉贤区',
-      addressCountry: 'CN',
-    },
+    ...(publicAddress ? {
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: publicAddress,
+        addressCountry: 'CN',
+      },
+    } : {}),
   }
 
   const tokens = new Map([
