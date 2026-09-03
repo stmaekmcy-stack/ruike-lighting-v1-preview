@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
+import { companyConfig } from './config/company'
 
 type IconName = 'arrow' | 'chevron' | 'menu' | 'close' | 'plus' | 'arrowUp'
 
@@ -10,7 +11,9 @@ type ProcessStep = {
   detail: string
 }
 
-type PublicationStatus = 'draft' | 'published'
+type PublishStatus = 'draft' | 'published'
+
+type FormStatus = 'idle' | 'submitting' | 'success' | 'error'
 
 type ProductionProductMedia = {
   image: string
@@ -27,14 +30,14 @@ type ProductMode = {
   developmentImage: string
   developmentAlt: string
   productionMedia: ProductionProductMedia | null
-  status: PublicationStatus
+  status: PublishStatus
 }
 
 type ProjectArchiveItem = {
   id: string
   className: string
   label: string
-  status: PublicationStatus
+  status: PublishStatus
   isRuikeProject?: boolean
   imageSourceVerified?: boolean
   approvedForPublication?: boolean
@@ -52,6 +55,14 @@ const navItems = [
 ]
 
 const isDevelopment = import.meta.env.DEV
+const formEndpoint = import.meta.env.VITE_PROJECT_FORM_ENDPOINT?.trim() ?? ''
+const formEnabled = isDevelopment || formEndpoint.length > 0
+const simulateFormFailure = import.meta.env.VITE_FORM_SIMULATE_FAILURE === 'true'
+
+const withBasePath = (path: string) => {
+  if (/^(?:https?:)?\/\//.test(path)) return path
+  return `${import.meta.env.BASE_URL}${path.replace(/^\/+/, '')}`
+}
 
 const principles = [
   { title: '视觉需求', body: '真实使用所需的视觉条件是否得到适宜回应。', motif: 'beam' },
@@ -106,12 +117,12 @@ const processSteps: ProcessStep[] = [
   },
 ]
 
-const productModes: ProductMode[] = [
+const developmentProductModes: ProductMode[] = [
   {
     title: '内嵌固定',
     english: 'RECESSED / FIXED',
     description: '稳定、克制，适合基础与重点照明。',
-    developmentImage: '/assets/recessed-light-on.jpeg',
+    developmentImage: 'src/dev-assets/recessed-light-on.jpeg',
     developmentAlt: '瑞客内嵌灯具开灯效果开发占位图',
     productionMedia: null,
     status: 'draft',
@@ -120,7 +131,7 @@ const productModes: ProductMode[] = [
     title: '深杯防眩',
     english: 'DEEP ANTI-GLARE',
     description: '见光不见灯，让光柔和地落下，而不是刺向视线。',
-    developmentImage: '/assets/recessed-light-off.jpeg',
+    developmentImage: 'src/dev-assets/recessed-light-off.jpeg',
     developmentAlt: '瑞客深杯防眩灯具开发占位图',
     productionMedia: null,
     status: 'draft',
@@ -129,7 +140,7 @@ const productModes: ProductMode[] = [
     title: '产品家族',
     english: 'PRODUCT FAMILY',
     description: '以产品架构承接不同空间任务，正式选型以最新技术确认单为准。',
-    developmentImage: '/assets/recessed-light-family.jpeg',
+    developmentImage: 'src/dev-assets/recessed-light-family.jpeg',
     developmentAlt: '瑞客内嵌灯具产品家族开发占位图',
     productionMedia: null,
     status: 'draft',
@@ -138,20 +149,24 @@ const productModes: ProductMode[] = [
     title: '选型资料',
     english: 'SELECTION NOTES',
     description: '参数是选择的工具，不是效果的替代；资料位持续维护中。',
-    developmentImage: '/assets/recessed-light-options.png',
+    developmentImage: 'src/dev-assets/recessed-light-options.png',
     developmentAlt: '瑞客内嵌灯具选型资料开发占位图',
     productionMedia: null,
     status: 'draft',
   },
 ]
 
-const projectArchive: ProjectArchiveItem[] = [
+const publishedProductModes: ProductMode[] = []
+
+const developmentProjectArchive: ProjectArchiveItem[] = [
   { id: 'slot-01', className: 'project-placeholder--tall', label: 'PROJECT IMAGE / 待补充真实项目影像', status: 'draft' },
   { id: 'slot-02', className: 'project-placeholder--tall project-placeholder--warm', label: 'PROJECT IMAGE / 待补充真实项目影像', status: 'draft' },
   { id: 'slot-03', className: 'project-placeholder--wide', label: 'PROJECT IMAGE / 待补充真实项目影像', status: 'draft' },
   { id: 'slot-04', className: '', label: 'PROJECT IMAGE / 待补充', status: 'draft' },
   { id: 'slot-05', className: '', label: 'PROJECT IMAGE / 待补充', status: 'draft' },
 ]
+
+const publishedProjectArchive: ProjectArchiveItem[] = []
 
 const isPublishableProject = (project: ProjectArchiveItem) => (
   project.status === 'published'
@@ -164,11 +179,15 @@ const isPublishableProject = (project: ProjectArchiveItem) => (
   && Boolean(project.alt)
 )
 
-const visibleProjects = isDevelopment ? projectArchive : projectArchive.filter(isPublishableProject)
+const visibleProjects = isDevelopment
+  ? developmentProjectArchive
+  : publishedProjectArchive.filter(isPublishableProject)
+
+const visibleNavItems = navItems.filter((item) => item.href !== '#projects' || visibleProjects.length > 0)
 
 const visibleProductModes = isDevelopment
-  ? productModes
-  : productModes.filter((product) => (
+  ? developmentProductModes
+  : publishedProductModes.filter((product) => (
       product.status === 'published'
       && product.productionMedia?.imageSourceVerified === true
       && product.productionMedia.approvedForPublication === true
@@ -176,6 +195,22 @@ const visibleProductModes = isDevelopment
       && Boolean(product.productionMedia.image)
       && Boolean(product.productionMedia.alt)
     ))
+
+const cleanSingleLine = (value: FormDataEntryValue | null, maxLength: number) => (
+  String(value ?? '')
+    .replace(/[<>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, maxLength)
+)
+
+const cleanMultiline = (value: FormDataEntryValue | null, maxLength: number) => (
+  String(value ?? '')
+    .replace(/[<>]/g, '')
+    .replace(/\r\n/g, '\n')
+    .trim()
+    .slice(0, maxLength)
+)
 
 function Icon({ name }: { name: IconName }) {
   if (name === 'arrow') {
@@ -232,14 +267,16 @@ function App() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeProcess, setActiveProcess] = useState(0)
   const [activeProduct, setActiveProduct] = useState(0)
-  const [formStatus, setFormStatus] = useState<'idle' | 'preview'>('idle')
+  const [formStatus, setFormStatus] = useState<FormStatus>('idle')
   const activeProductMode = visibleProductModes[activeProduct]
-  const activeProductImage = activeProductMode
+  const activeProductImagePath = activeProductMode
     ? (isDevelopment ? activeProductMode.developmentImage : activeProductMode.productionMedia?.image)
     : undefined
+  const activeProductImage = activeProductImagePath ? withBasePath(activeProductImagePath) : undefined
   const activeProductAlt = activeProductMode
     ? (isDevelopment ? activeProductMode.developmentAlt : activeProductMode.productionMedia?.alt)
     : undefined
+  const wechatQr = companyConfig.wechatQr ? withBasePath(companyConfig.wechatQr) : null
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 32)
@@ -253,9 +290,69 @@ function App() {
     setMenuOpen(false)
   }
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (isDevelopment) setFormStatus('preview')
+    const form = event.currentTarget
+
+    if (!formEnabled) {
+      setFormStatus('error')
+      return
+    }
+
+    if (!form.checkValidity()) {
+      form.reportValidity()
+      setFormStatus('error')
+      return
+    }
+
+    const formData = new FormData(form)
+    const honeypot = cleanSingleLine(formData.get('website'), 120)
+
+    if (honeypot) {
+      setFormStatus('success')
+      form.reset()
+      return
+    }
+
+    const payload = {
+      name: cleanSingleLine(formData.get('name'), 60),
+      contact: cleanSingleLine(formData.get('contact'), 120),
+      space: cleanSingleLine(formData.get('space'), 60),
+      brief: cleanMultiline(formData.get('brief'), 1200),
+    }
+
+    if (payload.name.length < 2 || payload.contact.length < 4) {
+      setFormStatus('error')
+      return
+    }
+
+    setFormStatus('submitting')
+
+    try {
+      if (isDevelopment) {
+        await new Promise((resolve) => window.setTimeout(resolve, 450))
+        if (simulateFormFailure) throw new Error('Simulated form failure')
+      } else {
+        const controller = new AbortController()
+        const timeoutId = window.setTimeout(() => controller.abort(), 12_000)
+        try {
+          const response = await fetch(formEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+          })
+          if (!response.ok) throw new Error('Project request failed')
+        } finally {
+          window.clearTimeout(timeoutId)
+        }
+      }
+
+      form.reset()
+      setFormStatus('success')
+    } catch {
+      setFormStatus('error')
+    }
   }
 
   return (
@@ -267,12 +364,12 @@ function App() {
             <span />
           </span>
           <span>
-            <strong>瑞客照明</strong>
+            <strong>{companyConfig.companyName}</strong>
             <small>RUIKE LIGHTING</small>
           </span>
         </a>
         <nav className={`main-nav ${menuOpen ? 'main-nav--open' : ''}`} aria-label="主导航">
-          {navItems.map((item) => (
+          {visibleNavItems.map((item) => (
             <a key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>
               {item.label}
             </a>
@@ -294,7 +391,12 @@ function App() {
 
       <main>
         <section className="hero" id="top">
-          <div className="hero__image" />
+          <div
+            className="hero__image"
+            role="img"
+            aria-label="建筑空间中暖光沿墙面与地面展开"
+            style={{ backgroundImage: `url(${withBasePath('assets/hero-architecture.png')})` }}
+          />
           <div className="hero__edge-fade" />
           <SectionRail number="01" label="LIGHT AS RESULT" light />
           <div className="hero__content page-width">
@@ -453,7 +555,7 @@ function App() {
                 {visibleProjects.map((project) => (
                   <div className={`${project.image ? 'project-image' : 'project-placeholder'} ${project.className}`.trim()} key={project.id}>
                     {project.image && project.alt ? (
-                      <img src={project.image} alt={project.alt} />
+                      <img src={withBasePath(project.image)} alt={project.alt} />
                     ) : (
                       <>
                         <span className="project-placeholder__cross"><Icon name="plus" /></span>
@@ -473,9 +575,7 @@ function App() {
               ) : null}
             </div>
           </section>
-        ) : (
-          <span className="section-anchor" id="projects" aria-hidden="true" />
-        )}
+        ) : null}
 
         <section className="products-section section-light" id="products">
           <SectionRail number="06" label="PRODUCT AS CARRIER" />
@@ -538,18 +638,18 @@ function App() {
               </h2>
               <p>把你的空间、真实使用场景和期待告诉瑞客。<br />我们先理解需要解决的问题，<br />再明确这个项目需要实现什么灯光效果。</p>
             </div>
-            <form className="project-form reveal-up" onSubmit={handleSubmit}>
+            <form className="project-form reveal-up" onSubmit={handleSubmit} noValidate aria-disabled={!formEnabled}>
               <label>
                 <span>称呼</span>
-                <input name="name" placeholder="怎么称呼您" required />
+                <input name="name" placeholder="怎么称呼您" autoComplete="name" minLength={2} maxLength={60} required disabled={!formEnabled} />
               </label>
               <label>
                 <span>联系方式</span>
-                <input name="contact" placeholder="电话 / 微信 / 邮箱" required />
+                <input name="contact" placeholder="电话 / 微信 / 邮箱" autoComplete="off" minLength={4} maxLength={120} required disabled={!formEnabled} />
               </label>
               <label>
                 <span>空间类型</span>
-                <select name="space" defaultValue="">
+                <select name="space" defaultValue="" disabled={!formEnabled}>
                   <option value="" disabled>请选择空间类型</option>
                   <option value="residential">居住空间</option>
                   <option value="commercial">商业空间</option>
@@ -559,20 +659,57 @@ function App() {
               </label>
               <label>
                 <span>项目描述</span>
-                <textarea name="brief" placeholder="空间位置、阶段或正在遇到的问题" rows={3} />
+                <textarea name="brief" placeholder="空间位置、阶段或正在遇到的问题" rows={3} maxLength={1200} disabled={!formEnabled} />
               </label>
-              <button className="button button--outline-light" type="submit">
-                {isDevelopment && formStatus === 'preview' ? 'V1.0 预览｜接口待接入' : '提交项目需求'} <Icon name="arrow" />
+              <label className="form-honeypot" aria-hidden="true">
+                <span>网站</span>
+                <input name="website" tabIndex={-1} autoComplete="off" disabled={!formEnabled} />
+              </label>
+              {!formEnabled && wechatQr ? (
+                <div className="form-contact-fallback">
+                  <img src={wechatQr} alt={`${companyConfig.wechat ?? companyConfig.companyName}二维码`} />
+                  <div>
+                    <strong>{companyConfig.wechat ?? '瑞客官方微信'}</strong>
+                    <p>线上项目表单尚未接通，请扫描二维码进入微信端。</p>
+                    {companyConfig.address ? <address>{companyConfig.address}</address> : null}
+                  </div>
+                </div>
+              ) : null}
+              <button className="button button--outline-light" type="submit" disabled={!formEnabled || formStatus === 'submitting'}>
+                {!formEnabled ? '在线表单暂未开放' : formStatus === 'submitting' ? '正在提交' : '提交项目需求'} <Icon name="arrow" />
               </button>
-              {isDevelopment ? <p className="form-note">当前为官网 V1.0 预览，表单接口待接入。</p> : null}
+              {formStatus !== 'idle' ? (
+                <p className={`form-status form-status--${formStatus}`} role="status" aria-live="polite">
+                  {formStatus === 'success'
+                    ? '项目信息已收到。瑞客会根据你提供的情况进一步了解项目。'
+                    : formStatus === 'error'
+                      ? '暂未提交成功。请检查必填信息，或稍后重试。'
+                      : '正在安全提交项目信息…'}
+                </p>
+              ) : null}
+              <p className="form-note form-consent">
+                提交即表示你同意瑞客仅为项目沟通目的处理你主动提供的信息。
+                <a href={withBasePath('privacy.html')}>隐私说明</a>
+                <a href={withBasePath('terms.html')}>网站使用条款</a>
+              </p>
+              {isDevelopment ? <p className="form-note form-development-note">开发环境使用模拟提交；生产环境仅在配置真实接收端后启用。</p> : null}
             </form>
           </div>
           <footer className="page-width site-footer">
             <a className="brand-lockup brand-lockup--footer" href="#top">
               <span className="brand-mark" aria-hidden="true"><span /><span /></span>
-              <span><strong>瑞客照明</strong><small>RUIKE LIGHTING</small></span>
+              <span><strong>{companyConfig.companyName}</strong><small>RUIKE LIGHTING</small></span>
             </a>
-            <span>专业创造效果，担当兑现承诺。</span>
+            <div className="site-footer__meta">
+              <span>专业创造效果，担当兑现承诺。</span>
+              {companyConfig.legalCompanyName && companyConfig.address ? (
+                <address>{companyConfig.legalCompanyName} · {companyConfig.address}</address>
+              ) : null}
+              <span className="site-footer__links">
+                <a href={withBasePath('privacy.html')}>隐私说明</a>
+                <a href={withBasePath('terms.html')}>网站使用条款</a>
+              </span>
+            </div>
             <a className="back-top" href="#top" aria-label="返回顶部"><Icon name="arrowUp" /></a>
           </footer>
         </section>
