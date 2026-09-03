@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- 正式主域名锁定为 `ruikelight.com`，`ruikelight.cn` 作为品牌保护域名。
+- 生产部署、DNS、ICP、Nginx 跳转与咨询接口测试统一使用正式域名。
+- 未核验的企业全称与地址改为生产变量控制，缺失时不公开也不写入结构化数据。
+
 ## [1.0.0-rc.1] - 2026-09-03
 
 ### Added

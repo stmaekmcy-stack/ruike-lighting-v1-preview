@@ -33,6 +33,8 @@ jobs:
       VITE_COMPANY_PHONE: ${{ vars.COMPANY_PHONE }}
       VITE_WECHAT_ID: ${{ vars.COMPANY_WECHAT_ID }}
       VITE_COMPANY_EMAIL: ${{ vars.COMPANY_EMAIL }}
+      VITE_COMPANY_LEGAL_NAME: ${{ vars.COMPANY_LEGAL_NAME }}
+      VITE_COMPANY_ADDRESS: ${{ vars.COMPANY_ADDRESS }}
       SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
       SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
       SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}

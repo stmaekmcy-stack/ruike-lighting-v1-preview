@@ -46,7 +46,7 @@ test('serves health checks and delivers one valid project request', async (conte
   const delivered = []
   const config = {
     trustProxy: true,
-    allowedOrigins: new Set(['https://ruikelighting.com']),
+    allowedOrigins: new Set(['https://ruikelight.com']),
     maxBodyBytes: 16 * 1024,
     rateLimitMax: 2,
     rateLimitWindowMs: 10 * 60 * 1_000,
@@ -71,7 +71,7 @@ test('serves health checks and delivers one valid project request', async (conte
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Origin': 'https://ruikelighting.com',
+      'Origin': 'https://ruikelight.com',
       'X-Forwarded-For': ip,
       'X-Ruike-Form': 'website-v1',
     },
