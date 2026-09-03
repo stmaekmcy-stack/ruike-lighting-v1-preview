@@ -27,8 +27,12 @@ npm run preview
 
 启用表单前，接收端必须同时完成服务端字段校验与清理、honeypot 检查、基础频率限制及真实邮件投递。SMTP 与收件地址只能保存在服务端环境变量中，不得添加 `VITE_` 前缀或提交到仓库。所需变量见 `.env.example`。
 
+## 最小事件记录
+
+首页已接入 `view_home`、`click_start_project`、`click_phone`、`view_wechat_qr`、`submit_lead_success` 与 `submit_lead_error`。当前未配置正式统计平台，因此事件只进入页面内存队列 `window.__RUIKE_ANALYTICS_QUEUE__`、兼容 `dataLayer`，并触发 `ruike:analytics` 浏览器事件；不写 Cookie、不持久化访客信息，也不记录表单内容。接入正式统计平台时可复用同一事件名，无需改动页面交互。
+
 ## 预发布
 
 GitHub Pages 工作流在 `main` 分支更新后执行 lint、typecheck、build 并部署 `dist`。预发布页面和 `robots.txt` 均设置为禁止搜索引擎收录；切换正式域名前必须更新 canonical、Open Graph、sitemap 与索引策略。
 
-上线前基线存档标签：`checkpoint-before-prelaunch-minimal-closeout`。
+上线前基线存档标签：`checkpoint-before-prelaunch-minimal-closeout`；试运行闭环施工前标签：`checkpoint-before-trial-run-closure`。

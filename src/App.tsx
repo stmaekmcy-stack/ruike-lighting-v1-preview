@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { companyConfig } from './config/company'
+import { trackEvent, trackEventOnce } from './lib/analytics'
 
 type IconName = 'arrow' | 'chevron' | 'menu' | 'close' | 'plus' | 'arrowUp'
 
@@ -268,6 +269,7 @@ function App() {
   const [activeProcess, setActiveProcess] = useState(0)
   const [activeProduct, setActiveProduct] = useState(0)
   const [formStatus, setFormStatus] = useState<FormStatus>('idle')
+  const wechatQrRef = useRef<HTMLImageElement>(null)
   const activeProductMode = visibleProductModes[activeProduct]
   const activeProductImagePath = activeProductMode
     ? (isDevelopment ? activeProductMode.developmentImage : activeProductMode.productionMedia?.image)
@@ -277,6 +279,13 @@ function App() {
     ? (isDevelopment ? activeProductMode.developmentAlt : activeProductMode.productionMedia?.alt)
     : undefined
   const wechatQr = companyConfig.wechatQr ? withBasePath(companyConfig.wechatQr) : null
+  const phoneHref = companyConfig.phone
+    ? `tel:${companyConfig.phone.replace(/[^\d+]/g, '')}`
+    : null
+
+  useEffect(() => {
+    trackEventOnce('view_home')
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 32)
@@ -285,7 +294,28 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  const scrollToStart = () => {
+  useEffect(() => {
+    const qrElement = wechatQrRef.current
+    if (!wechatQr || !qrElement) return
+
+    if (!('IntersectionObserver' in window)) {
+      trackEventOnce('view_wechat_qr', { source: 'contact' })
+      return
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        trackEventOnce('view_wechat_qr', { source: 'contact' })
+        observer.disconnect()
+      }
+    }, { threshold: 0.5 })
+
+    observer.observe(qrElement)
+    return () => observer.disconnect()
+  }, [wechatQr])
+
+  const scrollToStart = (source: 'navigation' | 'hero') => {
+    trackEvent('click_start_project', { source })
     document.querySelector('#start')?.scrollIntoView({ behavior: 'smooth' })
     setMenuOpen(false)
   }
@@ -296,12 +326,14 @@ function App() {
 
     if (!formEnabled) {
       setFormStatus('error')
+      trackEvent('submit_lead_error', { source: 'project_form', reason: 'unconfigured' })
       return
     }
 
     if (!form.checkValidity()) {
       form.reportValidity()
       setFormStatus('error')
+      trackEvent('submit_lead_error', { source: 'project_form', reason: 'validation' })
       return
     }
 
@@ -323,6 +355,7 @@ function App() {
 
     if (payload.name.length < 2 || payload.contact.length < 4) {
       setFormStatus('error')
+      trackEvent('submit_lead_error', { source: 'project_form', reason: 'validation' })
       return
     }
 
@@ -350,8 +383,13 @@ function App() {
 
       form.reset()
       setFormStatus('success')
+      trackEvent('submit_lead_success', { source: 'project_form' })
     } catch {
       setFormStatus('error')
+      trackEvent('submit_lead_error', {
+        source: 'project_form',
+        reason: isDevelopment && simulateFormFailure ? 'simulated' : 'network',
+      })
     }
   }
 
@@ -374,7 +412,7 @@ function App() {
               {item.label}
             </a>
           ))}
-          <button className="nav-project-link" type="button" onClick={scrollToStart}>
+          <button className="nav-project-link" type="button" onClick={() => scrollToStart('navigation')}>
             发起项目 <Icon name="arrow" />
           </button>
         </nav>
@@ -411,7 +449,7 @@ function App() {
               <br className="desktop-break" />
               让每一个空间因光而更具价值。
             </p>
-            <button className="button button--light" type="button" onClick={scrollToStart}>
+            <button className="button button--light" type="button" onClick={() => scrollToStart('hero')}>
               发起项目 <Icon name="arrow" />
             </button>
           </div>
@@ -618,7 +656,11 @@ function App() {
                   ))}
                 </div>
               ) : (
-                <a className="text-link" href="#start">
+                <a
+                  className="text-link"
+                  href="#start"
+                  onClick={() => trackEvent('click_start_project', { source: 'product' })}
+                >
                   发起项目 <Icon name="arrow" />
                 </a>
               )}
@@ -667,10 +709,19 @@ function App() {
               </label>
               {!formEnabled && wechatQr ? (
                 <div className="form-contact-fallback">
-                  <img src={wechatQr} alt={`${companyConfig.wechat ?? companyConfig.companyName}二维码`} />
+                  <img ref={wechatQrRef} src={wechatQr} alt={`${companyConfig.wechat ?? companyConfig.companyName}二维码`} />
                   <div>
                     <strong>{companyConfig.wechat ?? '瑞客官方微信'}</strong>
                     <p>线上项目表单尚未接通，请扫描二维码进入微信端。</p>
+                    {companyConfig.phone && phoneHref ? (
+                      <a
+                        href={phoneHref}
+                        onClick={() => trackEvent('click_phone', { source: 'contact' })}
+                      >
+                        {companyConfig.phone}
+                      </a>
+                    ) : null}
+                    {companyConfig.email ? <a href={`mailto:${companyConfig.email}`}>{companyConfig.email}</a> : null}
                     {companyConfig.address ? <address>{companyConfig.address}</address> : null}
                   </div>
                 </div>

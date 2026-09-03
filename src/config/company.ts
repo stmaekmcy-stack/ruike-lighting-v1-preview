@@ -11,7 +11,7 @@ export type CompanyConfig = {
   policeRecordNumber: string | null
 }
 
-export const companyConfig = {
+export const companyConfig: CompanyConfig = {
   companyName: '瑞客照明',
   legalCompanyName: '上海瑞客莱照明有限公司',
   phone: null,
@@ -22,4 +22,4 @@ export const companyConfig = {
   businessHours: null,
   icpNumber: null,
   policeRecordNumber: null,
-} satisfies CompanyConfig
+}
