@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 预发布：<https://stmaekmcy-stack.github.io/ruike-lighting-v1-preview/>
-- 正式生产上线：尚未执行；正式域名 `ruikelight.com` 与保护域名 `ruikelight.cn` 已购买，当前等待域名实名认证核验与中国大陆服务器购买。
+- 正式生产上线：尚未执行；正式域名与中国大陆轻量应用服务器已购买，当前等待实例地域、公网 IP、域名实名认证与备案主体核验。
 - 权威进度：[`docs/launch/LAUNCH_STATUS.md`](docs/launch/LAUNCH_STATUS.md)
 
 ## 环境基线
