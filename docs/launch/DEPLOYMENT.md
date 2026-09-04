@@ -47,7 +47,13 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
 
 以 Ubuntu LTS 为基线，推荐最小 2 vCPU / 2 GB RAM、40 GB SSD、3 Mbps 公网带宽。执行前用真实域名和 IP 替换变量值。
 
-1. 安装 Nginx、Certbot 和 Node.js 22，确认版本：
+1. 将仓库作为只读安装源，使用仓库内的幂等引导脚本完成软件、目录、systemd、sudoers 和 Nginx 待启用配置：
+
+   ```bash
+   sudo ops/scripts/ruike-bootstrap-server "$(pwd)"
+   ```
+
+   脚本会安装 Nginx、Certbot 和 Node.js 22，并在 DNS、ICP 和 TLS 就绪前保持 Nginx 与项目咨询服务关闭。执行后确认版本：
 
    ```bash
    node --version
@@ -55,7 +61,7 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    certbot --version
    ```
 
-2. 创建目录和独立发布用户：
+2. 如需人工核验目录和独立发布用户：
 
    ```bash
    sudo install -d -m 0755 /srv/ruike-lighting/releases
@@ -64,7 +70,7 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    sudo adduser --disabled-password --gecos "" ruike-deploy
    ```
 
-3. 将仓库中的发布、回滚和 systemd 文件安装到固定位置：
+3. 如需人工复核，发布、回滚和 systemd 文件应安装在以下固定位置：
 
    ```bash
    sudo install -m 0755 ops/scripts/ruike-activate-release /usr/local/sbin/ruike-activate-release
