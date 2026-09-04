@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Run as root." >&2
+  exit 1
+fi
+
+source_root="${1:-}"
+if [ -z "$source_root" ] || [ ! -d "$source_root/ops" ]; then
+  echo "Usage: ruike-bootstrap-server <release-source-root>" >&2
+  exit 1
+fi
+
+export DEBIAN_FRONTEND=noninteractive
+
+apt-get update
+apt-get install -y --no-install-recommends ca-certificates curl gnupg nginx certbot
+
+install -d -m 0755 /etc/apt/keyrings
+curl --fail --silent --show-error --location \
+  https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key \
+  | gpg --dearmor --batch --yes --output /etc/apt/keyrings/nodesource.gpg
+chmod 0644 /etc/apt/keyrings/nodesource.gpg
+printf '%s\n' \
+  'deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main' \
+  > /etc/apt/sources.list.d/nodesource.list
+
+apt-get update
+apt-get install -y --no-install-recommends nodejs
+
+if ! id -u ruike-deploy >/dev/null 2>&1; then
+  useradd --create-home --shell /bin/bash ruike-deploy
+fi
+
+install -d -m 0755 /srv/ruike-lighting/releases
+install -d -m 0755 /var/www/letsencrypt
+install -d -m 0750 /etc/ruike-lighting
+
+install -m 0755 "$source_root/ops/scripts/ruike-activate-release" \
+  /usr/local/sbin/ruike-activate-release
+install -m 0755 "$source_root/ops/scripts/ruike-rollback-release" \
+  /usr/local/sbin/ruike-rollback-release
+install -m 0644 "$source_root/ops/systemd/ruike-lead.service" \
+  /etc/systemd/system/ruike-lead.service
+install -m 0440 "$source_root/ops/sudoers/ruike-deploy" \
+  /etc/sudoers.d/ruike-deploy
+
+visudo -cf /etc/sudoers.d/ruike-deploy
+systemctl daemon-reload
+systemctl disable --now ruike-lead.service
+
+sed \
+  -e 's/__PRIMARY_DOMAIN__/ruikelight.com/g' \
+  -e 's/__WWW_DOMAIN__/www.ruikelight.com/g' \
+  -e 's/__CN_DOMAIN__/ruikelight.cn/g' \
+  -e 's/__CN_WWW_DOMAIN__/www.ruikelight.cn/g' \
+  "$source_root/ops/nginx/ruike-lighting.conf.template" \
+  > /etc/nginx/sites-available/ruike-lighting.conf.pending
+
+if grep -q '__' /etc/nginx/sites-available/ruike-lighting.conf.pending; then
+  echo "Unresolved Nginx placeholder." >&2
+  exit 1
+fi
+
+# The mainland production listener stays stopped until DNS, ICP and TLS are ready.
+systemctl disable --now nginx
+
+node --version
+npm --version
+nginx -v
+certbot --version
+printf 'RUIKE_SERVER_BOOTSTRAP=ready\n' \
+  > /etc/ruike-lighting/bootstrap-status
+
