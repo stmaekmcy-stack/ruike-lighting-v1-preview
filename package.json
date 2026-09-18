@@ -15,6 +15,7 @@
     "typecheck": "tsc -b --pretty false",
     "test": "node --test server/*.test.mjs",
     "check": "npm run lint && npm run typecheck && npm test && npm run build",
+    "verify:nginx": "node ops/scripts/verify-nginx.mjs",
     "start:lead-service": "node server/lead-service.mjs"
   },
   "dependencies": {

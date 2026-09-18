@@ -53,6 +53,7 @@ jobs:
           release_sha="$(git rev-parse HEAD)"
           git merge-base --is-ancestor "$release_sha" origin/main
           printf 'sha=%s\n' "$release_sha" >> "$GITHUB_OUTPUT"
+          printf 'RUIKE_RELEASE_ID=%s\n' "$release_sha" >> "$GITHUB_ENV"
       - name: Set up Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -90,6 +91,17 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
           printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
           chmod 600 ~/.ssh/known_hosts
+      - name: Verify installed operations match the approved release
+        run: |
+          port="${SSH_PORT:-22}"
+          for script in ruike-activate-release ruike-rollback-release; do
+            expected="$(sha256sum "ops/scripts/$script" | cut -d ' ' -f 1)"
+            actual="$(ssh -p "$port" "$SSH_USER@$SSH_HOST" "sha256sum '/usr/local/sbin/$script'" | cut -d ' ' -f 1)"
+            test "$actual" = "$expected" || { echo "Install reviewed operations before deployment: $script"; exit 1; }
+          done
+          expected="$(sed -e 's/__PRIMARY_DOMAIN__/ruikelight.com/g' -e 's/__WWW_DOMAIN__/www.ruikelight.com/g' ops/nginx/ruike-lighting.conf.template | sha256sum | cut -d ' ' -f 1)"
+          actual="$(ssh -p "$port" "$SSH_USER@$SSH_HOST" 'sha256sum /etc/nginx/sites-available/ruike-lighting.conf' | cut -d ' ' -f 1)"
+          test "$actual" = "$expected" || { echo 'Install reviewed Nginx configuration before deployment.'; exit 1; }
       - name: Upload and activate release
         id: activate
         env:
@@ -105,7 +117,12 @@ jobs:
       - name: Verify HTTPS and homepage health
         run: |
           curl --fail --show-error --silent --location --max-time 20 "$VITE_SITE_URL" > /dev/null
-          curl --fail --show-error --silent --max-time 10 "${VITE_SITE_URL%/}/healthz" | grep -q '"status":"ok"'
+          curl --fail --show-error --silent --max-time 10 "${VITE_SITE_URL%/}/healthz" | node --input-type=module -e '
+            let text = "";
+            for await (const chunk of process.stdin) text += chunk;
+            const health = JSON.parse(text);
+            if (health.status !== "ok" || health.release !== process.env.RUIKE_RELEASE_ID) process.exit(1);
+          '
       - name: Roll back when external verification fails
         if: failure() && steps.activate.outcome == 'success'
         run: |

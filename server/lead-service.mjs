@@ -67,6 +67,10 @@ export function validateLeadPayload(input, now = Date.now()) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     return { kind: 'invalid', message: '请求内容格式不正确。' }
   }
+  const limits = { name: 60, contact: 120, space: 60, brief: 1_200 }
+  if (Object.entries(limits).some(([field, limit]) => typeof input[field] !== 'string' || input[field].length > limit)) {
+    return { kind: 'invalid', message: '请检查必填信息的格式与长度。' }
+  }
 
   const website = cleanSingleLine(input.website, 120)
   const startedAt = Number(input.startedAt)
@@ -179,16 +183,17 @@ export function createSmtpDelivery(config) {
     auth: config.smtp.user
       ? { user: config.smtp.user, pass: config.smtp.password }
       : undefined,
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 15_000,
+    requireTLS: !config.smtp.secure,
+    connectionTimeout: 5_000,
+    greetingTimeout: 5_000,
+    socketTimeout: 10_000,
   })
 
   return {
     verify: () => transport.verify(),
     deliver: async (lead) => {
       const replyTo = isEmail(lead.contact) ? lead.contact : undefined
-      await transport.sendMail({
+      const result = await transport.sendMail({
         from: config.smtp.from,
         to: config.receiverEmail,
         replyTo,
@@ -204,6 +209,9 @@ export function createSmtpDelivery(config) {
           `接收时间：${lead.receivedAt}`,
         ].join('\n'),
       })
+      if (!result.accepted?.some((address) => String(address).toLowerCase() === config.receiverEmail.toLowerCase())) {
+        throw new Error('The configured recipient was not accepted by the mail server.')
+      }
     },
   }
 }

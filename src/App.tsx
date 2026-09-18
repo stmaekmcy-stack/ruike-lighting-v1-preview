@@ -275,6 +275,7 @@ function App() {
   const wechatQrRef = useRef<HTMLImageElement>(null)
   const formStartedAtRef = useRef<number | null>(null)
   const copyResetTimeoutRef = useRef<number | null>(null)
+  const formSubmittingRef = useRef(false)
   const activeProductMode = visibleProductModes[activeProduct]
   const activeProductImagePath = activeProductMode
     ? (isDevelopment ? activeProductMode.developmentImage : activeProductMode.productionMedia?.image)
@@ -342,26 +343,43 @@ function App() {
 
   const scrollToStart = (source: 'navigation' | 'hero') => {
     trackEvent('click_start_project', { source })
-    document.querySelector('#start')?.scrollIntoView({ behavior: 'smooth' })
     setMenuOpen(false)
+    window.requestAnimationFrame(() => {
+      document.querySelector('#start')?.scrollIntoView({
+        behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+      })
+    })
   }
 
   const handleCopyWechat = async () => {
     if (!companyConfig.wechatId) return
 
     try {
+      let copied = false
       if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(companyConfig.wechatId)
-      } else {
+        try {
+          await navigator.clipboard.writeText(companyConfig.wechatId)
+          copied = true
+        } catch {
+          // Some embedded browsers expose the API but reject its permission.
+        }
+      }
+      if (!copied) {
+        const previousFocus = document.activeElement
         const textArea = document.createElement('textarea')
         textArea.value = companyConfig.wechatId
         textArea.setAttribute('readonly', '')
         textArea.style.position = 'fixed'
         textArea.style.opacity = '0'
         document.body.appendChild(textArea)
-        textArea.select()
-        const copied = document.execCommand('copy')
-        textArea.remove()
+        try {
+          textArea.select()
+          textArea.setSelectionRange(0, textArea.value.length)
+          copied = document.execCommand('copy')
+        } finally {
+          textArea.remove()
+          if (previousFocus instanceof HTMLElement) previousFocus.focus({ preventScroll: true })
+        }
         if (!copied) throw new Error('Copy command failed')
       }
       setWechatCopyStatus('success')
@@ -375,6 +393,7 @@ function App() {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (formSubmittingRef.current) return
     const form = event.currentTarget
 
     if (!formEnabled) {
@@ -415,6 +434,7 @@ function App() {
       return
     }
 
+    formSubmittingRef.current = true
     setFormStatus('submitting')
     setFormMessage('正在安全提交项目信息…')
 
@@ -424,7 +444,7 @@ function App() {
         if (simulateFormFailure) throw new Error('Simulated form failure')
       } else {
         const controller = new AbortController()
-        const timeoutId = window.setTimeout(() => controller.abort(), 12_000)
+        const timeoutId = window.setTimeout(() => controller.abort(), 30_000)
         try {
           const response = await fetch(formEndpoint, {
             method: 'POST',
@@ -439,8 +459,8 @@ function App() {
             }),
             signal: controller.signal,
           })
-          if (!response.ok) {
-            const responseBody = await response.json().catch(() => null) as { message?: string } | null
+          const responseBody = await response.json().catch(() => null) as { ok?: boolean; message?: string } | null
+          if (!response.ok || responseBody?.ok !== true) {
             throw new Error(responseBody?.message || '暂未提交成功，请稍后重试，或直接通过电话、微信联系瑞客。')
           }
         } finally {
@@ -462,10 +482,12 @@ function App() {
         source: 'project_form',
         reason: isDevelopment && simulateFormFailure ? 'simulated' : 'network',
       })
+    } finally {
+      formSubmittingRef.current = false
     }
   }
 
-  const contactFallback = wechatQr || phoneHref || companyConfig.email ? (
+  const contactFallback = wechatQr || phoneHref || companyConfig.wechatId || companyConfig.email ? (
     <div className={`form-contact-fallback ${wechatQr ? '' : 'form-contact-fallback--text-only'}`.trim()}>
       {wechatQr ? (
         <img
@@ -673,6 +695,8 @@ function App() {
                   className={`process-node ${activeProcess === index ? 'process-node--active' : ''}`}
                   key={step.number}
                   type="button"
+                  aria-pressed={activeProcess === index}
+                  aria-controls="process-detail"
                   onClick={() => setActiveProcess(index)}
                 >
                   <span className="process-node__dot" />
@@ -681,7 +705,7 @@ function App() {
                 </button>
               ))}
             </div>
-            <div className="process-detail">
+            <div className="process-detail" id="process-detail" aria-live="polite" aria-atomic="true">
               <div className="process-detail__number">{processSteps[activeProcess].number}</div>
               <div>
                 <h3>{processSteps[activeProcess].summary}</h3>
@@ -802,7 +826,7 @@ function App() {
               <p>把你的空间、真实使用场景和期待告诉瑞客。<br />我们先理解需要解决的问题，<br />再明确这个项目需要实现什么灯光效果。</p>
             </div>
             {formEnabled ? (
-            <form className="project-form reveal-up" onSubmit={handleSubmit} noValidate>
+            <form className="project-form reveal-up" onSubmit={handleSubmit} aria-busy={formStatus === 'submitting'} noValidate>
               <label>
                 <span>称呼</span>
                 <input name="name" placeholder="怎么称呼您" autoComplete="name" minLength={2} maxLength={60} required disabled={!formEnabled} />

@@ -18,10 +18,10 @@ if [[ ! "$release_id" =~ ^[0-9a-f]{7,40}$ ]]; then
   exit 1
 fi
 
-case "$archive_path" in
-  /tmp/ruike-*.tar.gz) ;;
-  *) echo "Release archive must be an explicit /tmp/ruike-*.tar.gz path." >&2; exit 1 ;;
-esac
+if [ "$archive_path" != "/tmp/ruike-${release_id}.tar.gz" ]; then
+  echo "Release archive must match the approved release id." >&2
+  exit 1
+fi
 
 if [ ! -f "$archive_path" ]; then
   echo "Release archive not found." >&2
@@ -33,8 +33,14 @@ if [ "$lead_service_enabled" != "true" ] && [ "$lead_service_enabled" != "false"
   exit 1
 fi
 
-if tar -tzf "$archive_path" | grep -Eq '(^/|(^|/)\.\.(/|$))'; then
+if tar -tzf "$archive_path" | grep -E '(^/|(^|/)\.\.(/|$))' >/dev/null; then
   echo "Unsafe path found in release archive." >&2
+  exit 1
+fi
+
+# Release archives contain only regular files and directories, never links or devices.
+if tar -tvzf "$archive_path" | grep -E '^[^d-]' >/dev/null; then
+  echo "Unsupported file type found in release archive." >&2
   exit 1
 fi
 
@@ -50,11 +56,13 @@ tar -xzf "$archive_path" -C "$release_dir"
 rm -f "$archive_path"
 
 test -f "$release_dir/dist/index.html"
+test -f "$release_dir/dist/healthz.json"
 test -f "$release_dir/server/lead-service.mjs"
 test -d "$release_dir/node_modules/nodemailer"
 /usr/bin/node --check "$release_dir/server/lead-service.mjs"
 printf '%s\n' "$lead_service_enabled" > "$release_dir/.lead-service-enabled"
-chown -R www-data:www-data "$release_dir"
+chown -R root:www-data "$release_dir"
+chmod -R u=rwX,g=rX,o=rX "$release_dir"
 
 nginx -t
 
@@ -78,20 +86,26 @@ mv -Tf "${current_link}.next" "$current_link"
 set_lead_service_mode() {
   local enabled="$1"
   if [ "$enabled" = "true" ]; then
-    systemctl restart ruike-lead.service \
-      && curl --fail --silent --max-time 5 http://127.0.0.1:8787/healthz >/dev/null
+    systemctl enable ruike-lead.service >/dev/null 2>&1
+    systemctl restart ruike-lead.service
+    for attempt in {1..15}; do
+      if curl --fail --silent --max-time 2 http://127.0.0.1:8787/healthz >/dev/null; then return 0; fi
+      sleep 1
+    done
+    return 1
   else
-    systemctl stop ruike-lead.service || true
+    systemctl disable --now ruike-lead.service
   fi
 }
 
 restore_previous_release() {
   if [ -n "$old_target" ] && [[ "$old_target" == "$release_root/"* ]]; then
-    ln -sfn "$old_target" "$current_link"
+    ln -sfn "$old_target" "${current_link}.next"
+    mv -Tf "${current_link}.next" "$current_link"
     set_lead_service_mode "$old_lead_service_enabled" || true
   else
     rm -f "$current_link"
-    systemctl stop ruike-lead.service || true
+    systemctl disable --now nginx ruike-lead.service || true
   fi
 }
 
@@ -101,7 +115,7 @@ if ! set_lead_service_mode "$lead_service_enabled"; then
   exit 1
 fi
 
-if ! nginx -t || ! systemctl reload nginx; then
+if ! nginx -t || ! systemctl enable nginx || ! systemctl reload-or-restart nginx; then
   restore_previous_release
   systemctl reload nginx || true
   echo "Nginx reload failed; previous release restored." >&2

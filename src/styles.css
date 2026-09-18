@@ -264,7 +264,8 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .brand-lockup--footer { color: var(--white); font-family: Manrope, sans-serif; }
 .site-footer__meta { display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; }
 .site-footer__meta address { color: rgba(247, 245, 240, 0.58); font-style: normal; line-height: 1.6; }
-.site-footer__links { display: flex; gap: 16px; }
+.site-footer__links { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+.site-footer__links a { white-space: nowrap; }
 .back-top { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid rgba(247, 245, 240, 0.35); }
 .back-top svg { width: 15px; height: 15px; }
 
@@ -311,6 +312,7 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
   .nav-project-link { justify-content: space-between; margin-top: 30px; color: var(--ink); padding: 15px 0; border-width: 0 0 1px; }
   .menu-toggle { position: relative; z-index: 1; display: block; padding: 3px; }
   .site-nav--scrolled .menu-toggle { color: var(--ink); }
+  .main-nav--open + .menu-toggle { color: var(--ink); }
   .section-rail { display: none; }
   .page-width { width: var(--page); }
   .hero, .hero__content { min-height: 760px; }

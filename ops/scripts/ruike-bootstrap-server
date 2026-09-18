@@ -53,8 +53,6 @@ systemctl disable --now ruike-lead.service
 sed \
   -e 's/__PRIMARY_DOMAIN__/ruikelight.com/g' \
   -e 's/__WWW_DOMAIN__/www.ruikelight.com/g' \
-  -e 's/__CN_DOMAIN__/ruikelight.cn/g' \
-  -e 's/__CN_WWW_DOMAIN__/www.ruikelight.cn/g' \
   "$source_root/ops/nginx/ruike-lighting.conf.template" \
   > /etc/nginx/sites-available/ruike-lighting.conf.pending
 
@@ -72,4 +70,3 @@ nginx -v
 certbot --version
 printf 'RUIKE_SERVER_BOOTSTRAP=ready\n' \
   > /etc/ruike-lighting/bootstrap-status
-

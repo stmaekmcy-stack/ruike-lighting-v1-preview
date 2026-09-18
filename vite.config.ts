@@ -27,6 +27,7 @@ export default defineConfig(({ mode }) => {
   const publicAddress = env.VITE_COMPANY_ADDRESS?.trim()
   const publicIcpNumber = env.VITE_COMPANY_ICP_NUMBER?.trim()
   const formEndpoint = env.VITE_PROJECT_FORM_ENDPOINT?.trim()
+  const releaseId = env.RUIKE_RELEASE_ID?.trim() || 'local'
   const hostname = new URL(siteUrl).hostname
   const isReservedHostname = hostname === 'localhost'
     || hostname === '127.0.0.1'
@@ -53,7 +54,7 @@ export default defineConfig(({ mode }) => {
   }
 
   if (allowIndexing) {
-    if (!siteUrl.startsWith('https://') || hostname.endsWith('.github.io') || isReservedHostname) {
+    if (deploymentTarget !== 'production' || !siteUrl.startsWith('https://') || hostname.endsWith('.github.io') || isReservedHostname) {
       throw new Error('VITE_ALLOW_INDEXING=true requires the final HTTPS production domain.')
     }
   }
@@ -99,6 +100,7 @@ export default defineConfig(({ mode }) => {
     ['__RUIKE_SITE_URL__', siteUrl],
     ['__RUIKE_ROBOTS__', allowIndexing ? 'index, follow' : 'noindex, nofollow'],
     ['__RUIKE_ORGANIZATION_JSON_LD__', JSON.stringify(organization).replaceAll('<', '\\u003c')],
+    ['__RUIKE_ICP_FOOTER__', publicIcpNumber ? `<p class="legal-updated"><a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">${publicIcpNumber}</a></p>` : ''],
   ])
 
   const applyTokens = (html: string) => {
@@ -125,6 +127,7 @@ export default defineConfig(({ mode }) => {
 
           writeFileSync(resolve('dist', 'robots.txt'), robots)
           writeFileSync(resolve('dist', 'sitemap.xml'), sitemap)
+          writeFileSync(resolve('dist', 'healthz.json'), JSON.stringify({ status: 'ok', release: releaseId }) + '\n')
         },
       },
     ],

@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_WECHAT_ID?: string
   readonly VITE_COMPANY_EMAIL?: string
   readonly VITE_COMPANY_ICP_NUMBER?: string
+  readonly VITE_COMPANY_LEGAL_NAME?: string
+  readonly VITE_COMPANY_ADDRESS?: string
 }
 
 interface ImportMeta {
