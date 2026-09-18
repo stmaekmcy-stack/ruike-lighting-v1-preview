@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Installs reviewed operations files without starting the public website.
+set -Eeuo pipefail
+
+if [ "$(id -u)" -ne 0 ]; then
+  echo "Run as root from the existing administrator session." >&2
+  exit 1
+fi
+
+source_root="${1:-}"
+if [ -z "$source_root" ] || [ ! -f "$source_root/ops/nginx/ruike-lighting.conf.template" ]; then
+  echo "Usage: ruike-install-site <reviewed-source-root>" >&2
+  exit 1
+fi
+
+bash -n "$source_root/ops/scripts/ruike-activate-release"
+bash -n "$source_root/ops/scripts/ruike-rollback-release"
+visudo -cf "$source_root/ops/sudoers/ruike-deploy"
+install -d -m 0750 /etc/ruike-lighting/ops-backups
+backup_dir="$(mktemp -d /etc/ruike-lighting/ops-backups/update-XXXXXX)"
+for prior in /usr/local/sbin/ruike-activate-release /usr/local/sbin/ruike-rollback-release /etc/systemd/system/ruike-lead.service /etc/sudoers.d/ruike-deploy /etc/nginx/sites-available/ruike-lighting.conf.pending; do
+  if [ -f "$prior" ]; then cp -p "$prior" "$backup_dir/"; fi
+done
+
+install -m 0755 "$source_root/ops/scripts/ruike-activate-release" /usr/local/sbin/ruike-activate-release
+install -m 0755 "$source_root/ops/scripts/ruike-rollback-release" /usr/local/sbin/ruike-rollback-release
+install -m 0644 "$source_root/ops/systemd/ruike-lead.service" /etc/systemd/system/ruike-lead.service
+install -m 0440 "$source_root/ops/sudoers/ruike-deploy" /etc/sudoers.d/ruike-deploy
+systemctl daemon-reload
+
+sed -e 's/__PRIMARY_DOMAIN__/ruikelight.com/g' \
+    -e 's/__WWW_DOMAIN__/www.ruikelight.com/g' \
+    "$source_root/ops/nginx/ruike-lighting.conf.template" \
+    > /etc/nginx/sites-available/ruike-lighting.conf.pending
+if grep -q '__' /etc/nginx/sites-available/ruike-lighting.conf.pending; then
+  echo "Unresolved Nginx placeholder; pending config not enabled." >&2
+  exit 1
+fi
+printf 'Operations installed. Existing files backed up to %s\n' "$backup_dir"
+printf 'Public website remains in its existing state; DNS, certificates and activation are separate.\n'

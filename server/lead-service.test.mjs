@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict'
 import { once } from 'node:events'
 import test from 'node:test'
+import nodemailer from 'nodemailer'
 import {
   SlidingWindowRateLimiter,
   createLeadServer,
+  createSmtpDelivery,
+  loadLeadServiceConfig,
   validateLeadPayload,
 } from './lead-service.mjs'
 
@@ -40,6 +43,56 @@ test('limits repeated delivery attempts inside one window', () => {
   assert.equal(limiter.consume('client', NOW + 1).allowed, true)
   assert.equal(limiter.consume('client', NOW + 2).allowed, false)
   assert.equal(limiter.consume('client', NOW + 10_001).allowed, true)
+})
+
+test('rejects non-string and oversized fields instead of storing coerced values', () => {
+  assert.equal(validateLeadPayload(validPayload({ contact: { phone: 'invalid' } }), NOW).kind, 'invalid')
+  assert.equal(validateLeadPayload(validPayload({ brief: 'x'.repeat(1_201) }), NOW).kind, 'invalid')
+})
+
+test('refuses to start without a real receiver configuration', () => {
+  assert.throws(() => loadLeadServiceConfig({}), /configuration is incomplete/)
+})
+
+test('mail delivery requires the configured recipient to be accepted', async (context) => {
+  const receiverEmail = 'receiver@example.test'
+  let accepted = []
+  let transportOptions
+  context.mock.method(nodemailer, 'createTransport', (options) => {
+    transportOptions = options
+    return { verify: async () => true, sendMail: async () => ({ accepted }) }
+  })
+  const smtp = createSmtpDelivery({ receiverEmail, smtp: { secure: false } })
+  const lead = validateLeadPayload(validPayload(), NOW).lead
+  await assert.rejects(() => smtp.deliver(lead), /recipient was not accepted/)
+  assert.equal(transportOptions.requireTLS, true)
+  accepted = [receiverEmail]
+  await smtp.deliver(lead)
+})
+
+test('delivery errors return 503 without leaking submitted contact information', async (context) => {
+  const logs = []
+  const server = createLeadServer({
+    config: { trustProxy: false, allowedOrigins: new Set(['https://ruikelight.com']), maxBodyBytes: 1_024, rateLimitMax: 3, rateLimitWindowMs: 600_000 },
+    deliverLead: async () => { throw new Error('SMTP password or receiver details must never appear') },
+    logger: (record) => logs.push(record),
+    now: () => NOW,
+  })
+  server.listen(0, '127.0.0.1')
+  await once(server, 'listening')
+  context.after(() => server.close())
+  const url = `http://127.0.0.1:${server.address().port}/api/project-leads`
+  const headers = { 'Content-Type': 'application/json', Origin: 'https://ruikelight.com', 'X-Ruike-Form': 'website-v1' }
+  const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(validPayload()) })
+  assert.equal(response.status, 503)
+  const body = await response.json()
+  assert.equal(body.ok, false)
+  assert.match(body.message, /暂未提交成功/)
+  assert.doesNotMatch(JSON.stringify(logs) + JSON.stringify(body), /test-contact|官网测试|SMTP password/)
+  const invalid = await fetch(url, { method: 'POST', headers, body: '{invalid' })
+  assert.equal(invalid.status, 400)
+  const oversized = await fetch(url, { method: 'POST', headers, body: JSON.stringify(validPayload({ brief: 'x'.repeat(2_048) })) })
+  assert.equal(oversized.status, 413)
 })
 
 test('serves health checks and delivers one valid project request', async (context) => {

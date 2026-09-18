@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 预发布：<https://stmaekmcy-stack.github.io/ruike-lighting-v1-preview/>
-- 正式生产上线：尚未执行；正式域名与中国大陆轻量应用服务器已购买，当前等待实例地域、公网 IP、域名实名认证与备案主体核验。
+- 正式生产上线：尚未执行；`.com` ICP 已通过，上海服务器私有环境验证通过。当前等待腾讯云登录、完整网站备案号与真实咨询资料，再进行正式域名切换。
 - 权威进度：[`docs/launch/LAUNCH_STATUS.md`](docs/launch/LAUNCH_STATUS.md)
 
 ## 环境基线
@@ -25,6 +25,7 @@ npm run typecheck
 npm test
 npm run build
 npm run check
+npm run verify:nginx # Ubuntu + nginx/openssl/curl；仅使用私有测试端口
 npm run preview
 ```
 
@@ -58,3 +59,4 @@ GitHub Pages 工作流在 `main` 分支更新后执行 lint、typecheck、build 
 - [域名与 DNS](docs/launch/DOMAIN_AND_DNS.md)
 - [ICP 备案执行清单](docs/launch/ICP_CHECKLIST.md)
 - [上线决策记录](docs/launch/DECISIONS.md)
+- [本轮验证与待办](docs/launch/VERIFICATION.md)

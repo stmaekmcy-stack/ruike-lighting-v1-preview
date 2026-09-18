@@ -88,37 +88,35 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    sudo visudo -cf /etc/sudoers.d/ruike-deploy
    ```
 
-5. DNS A/CNAME 生效后，为主域名、`www` 与 `.cn` 保护域名申请同一张证书：
+5. 用户最终确认且 `.com` DNS A/CNAME 生效后，只为 `ruikelight.com` 与 `www.ruikelight.com` 申请证书。`.cn` 暂不纳入；证书签发服务的法律协议由用户确认。
 
    ```bash
    RUIKE_PRIMARY_DOMAIN=ruikelight.com
    RUIKE_WWW_DOMAIN=www.ruikelight.com
-   RUIKE_CN_DOMAIN=ruikelight.cn
-   RUIKE_CN_WWW_DOMAIN=www.ruikelight.cn
    sudo systemctl stop nginx
    sudo certbot certonly --standalone \
-     -d "$RUIKE_PRIMARY_DOMAIN" -d "$RUIKE_WWW_DOMAIN" \
-     -d "$RUIKE_CN_DOMAIN" -d "$RUIKE_CN_WWW_DOMAIN"
-   sudo systemctl start nginx
+     -d "$RUIKE_PRIMARY_DOMAIN" -d "$RUIKE_WWW_DOMAIN"
    ```
 
-6. 生成 Nginx 正式配置，确认无任何占位符后启用：
+6. 先安装新运维文件并保留旧文件备份（不会启动公网服务）：
+
+   ```bash
+   sudo bash ops/scripts/ruike-install-site "$(pwd)"
+   ```
+
+   证书存在且用户确认上线后，将待启用配置安装到正式位置。初次安装时检查 `sites-enabled/default`，若仍指向发行版默认站点，先将该软链接移至本次运维备份目录，避免重复 `default_server`。不得删除无关虚拟主机。
 
    ```bash
    RUIKE_PRIMARY_DOMAIN=ruikelight.com
    RUIKE_WWW_DOMAIN=www.ruikelight.com
-   RUIKE_CN_DOMAIN=ruikelight.cn
-   RUIKE_CN_WWW_DOMAIN=www.ruikelight.cn
    sed -e "s/__PRIMARY_DOMAIN__/$RUIKE_PRIMARY_DOMAIN/g" \
        -e "s/__WWW_DOMAIN__/$RUIKE_WWW_DOMAIN/g" \
-       -e "s/__CN_DOMAIN__/$RUIKE_CN_DOMAIN/g" \
-       -e "s/__CN_WWW_DOMAIN__/$RUIKE_CN_WWW_DOMAIN/g" \
        ops/nginx/ruike-lighting.conf.template > /tmp/ruike-lighting.conf
    grep -q '__' /tmp/ruike-lighting.conf && exit 1 || true
    sudo install -m 0644 /tmp/ruike-lighting.conf /etc/nginx/sites-available/ruike-lighting.conf
    sudo ln -sfn /etc/nginx/sites-available/ruike-lighting.conf /etc/nginx/sites-enabled/ruike-lighting.conf
    sudo nginx -t
-   sudo systemctl reload nginx
+   # 这里仅校验配置；发布脚本在 current 指向真实发布包后启动 Nginx。
    ```
 
 7. 如果暂不启用表单，不创建包含虚假值的服务端环境文件，GitHub 中 `PROJECT_FORM_ENDPOINT` 留空。如果启用，根据 `ops/env/lead-service.env.example` 填入真实值：
@@ -131,7 +129,13 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    curl --fail http://127.0.0.1:8787/healthz
    ```
 
-8. 在 GitHub Actions 手动运行 `Deploy production`，`release_ref` 必须是已审核的 commit 或版本标签，确认字符串只能在最终生产批准后填写。
+8. 在 GitHub Actions 手动运行 `Deploy production`，`release_ref` 必须是已审核的 commit 或版本标签，确认字符串只能在最终生产批准后填写。工作流核验 `/healthz` 中的 release 与所发布 commit 一致。首发失败没有前一版时，回滚会关闭公网服务并保留发布目录；已有旧版时恢复旧版。
+
+证书续期使用 webroot 模式，HTTP 80 的 ACME 路径由 Nginx 提供。首次签发成功后将该证书续期配置改为 webroot 并执行演练，避免 standalone 续期与占用 80 端口的 Nginx 冲突；不得仅安装 Certbot 后就宣称自动续期完成。
+
+## 私有环境验证
+
+已在目标上海服务器上以 `ruike-deploy` 普通用户执行 `node ops/scripts/verify-nginx.mjs`。脚本使用临时测试证书（客户端显式信任，不关闭 TLS 校验）、本机回环监听和复制的发布文件，验证后停止测试进程并清除自建临时目录。它不会切换正式 DNS、安装系统配置或启动系统 Nginx。
 
 ## 表单真实接收验收
 
@@ -159,13 +163,13 @@ sudo /usr/local/sbin/ruike-rollback-release
 ```bash
 curl --fail --silent https://ruikelight.com/ > /dev/null
 curl --fail --silent https://ruikelight.com/healthz
-curl --head --silent https://ruikelight.cn/ | grep -i '^location: https://ruikelight.com/'
+curl --head --silent https://www.ruikelight.com/ | grep -i '^location: https://ruikelight.com/'
 readlink -f /srv/ruike-lighting/current
 ```
 
 ## 上线后监控与备份
 
-- 每 5 分钟检查首页 HTTPS 和 `/healthz`，连续 2 次失败才告警。
+- 正式发布后再配置每 5 分钟首页 HTTPS 和 `/healthz` 检查，连续 2 次失败才告警；目前未配置定时监控，不应视为已启用。
 - 启用表单后，检查 `ruike-lead.service` 运行状态与非 2xx 计数；日志仅保留请求 ID、状态码和耗时，不记录表单个人信息。
 - 每日备份 `/etc/nginx/sites-available/ruike-lighting.conf` 和已加密的 `/etc/ruike-lighting/lead-service.env`；源代码、文档和版本标签已由 GitHub 保存。
 - 每月执行证书续期演练：`sudo certbot renew --dry-run`。

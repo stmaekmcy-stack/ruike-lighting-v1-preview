@@ -10,8 +10,16 @@ release_root="/srv/ruike-lighting/releases"
 current_link="/srv/ruike-lighting/current"
 previous_link="/srv/ruike-lighting/previous"
 
-current_target="$(readlink -f "$current_link")"
-previous_target="$(readlink -f "$previous_link")"
+current_target="$(readlink -f "$current_link" || true)"
+previous_target="$(readlink -f "$previous_link" || true)"
+
+if [[ "$current_target" == "$release_root/"* ]] && [ -d "$current_target" ] && [ ! -L "$previous_link" ]; then
+  # A failed first launch has no prior release. Close the site; retain its files.
+  systemctl disable --now nginx ruike-lead.service
+  rm -f "$current_link"
+  echo "First launch withdrawn; release files retained at $current_target"
+  exit 0
+fi
 
 if [[ "$current_target" != "$release_root/"* ]] || [[ "$previous_target" != "$release_root/"* ]] || [ ! -d "$previous_target" ]; then
   echo "A valid previous release is not available." >&2
@@ -28,10 +36,11 @@ if [ -f "$previous_target/.lead-service-enabled" ]; then
 fi
 
 if [ "$lead_service_enabled" = "true" ]; then
+  systemctl enable ruike-lead.service >/dev/null 2>&1
   systemctl restart ruike-lead.service
-  curl --fail --silent --max-time 5 http://127.0.0.1:8787/healthz >/dev/null
+  curl --fail --silent --retry 15 --retry-connrefused --retry-delay 1 --max-time 2 http://127.0.0.1:8787/healthz >/dev/null
 else
-  systemctl stop ruike-lead.service || true
+  systemctl disable --now ruike-lead.service
 fi
 
 nginx -t
