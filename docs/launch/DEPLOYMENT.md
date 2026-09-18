@@ -129,7 +129,7 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    curl --fail http://127.0.0.1:8787/healthz
    ```
 
-8. 在 GitHub Actions 手动运行 `Deploy production`，`release_ref` 必须是已审核的 commit 或版本标签，确认字符串只能在最终生产批准后填写。工作流核验 `/healthz` 中的 release 与所发布 commit 一致。首发失败没有前一版时，回滚会关闭公网服务并保留发布目录；已有旧版时恢复旧版。
+8. 在 GitHub Actions 手动运行 `Deploy production`，`release_ref` 必须是已审核的 commit 或版本标签，确认字符串只能在最终生产批准后填写。工作流先比对服务器已安装发布/回滚脚本和 Nginx 配置的 SHA256，旧运维文件未更新时拒绝发布；再核验 `/healthz` 中的 release 与所发布 commit 一致。首发失败没有前一版时，回滚会关闭公网服务并保留发布目录；已有旧版时恢复旧版。
 
 证书续期使用 webroot 模式，HTTP 80 的 ACME 路径由 Nginx 提供。首次签发成功后将该证书续期配置改为 webroot 并执行演练，避免 standalone 续期与占用 80 端口的 Nginx 冲突；不得仅安装 Certbot 后就宣称自动续期完成。
 
