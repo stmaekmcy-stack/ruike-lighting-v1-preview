@@ -10,6 +10,7 @@ interface ImportMetaEnv {
   readonly VITE_COMPANY_PHONE?: string
   readonly VITE_WECHAT_ID?: string
   readonly VITE_COMPANY_EMAIL?: string
+  readonly VITE_COMPANY_ICP_NUMBER?: string
 }
 
 interface ImportMeta {

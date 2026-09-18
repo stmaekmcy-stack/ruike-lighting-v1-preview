@@ -30,6 +30,7 @@ GitHub Actions 测试、构建、打包、校验和
 | `COMPANY_EMAIL` | 真实对外邮箱；缺失时留空 |
 | `COMPANY_LEGAL_NAME` | 与营业执照逐字核验后的企业全称；未核验时留空 |
 | `COMPANY_ADDRESS` | 经企业确认可公开的真实地址；未确认时留空 |
+| `COMPANY_ICP_NUMBER` | 管局核准的完整网站备案号，必须包含网站序号后缀；未核验时生产构建会主动失败 |
 
 ### Secrets
 
