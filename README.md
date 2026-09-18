@@ -5,7 +5,7 @@
 ## 当前状态
 
 - 预发布：<https://stmaekmcy-stack.github.io/ruike-lighting-v1-preview/>
-- 正式生产上线：尚未执行；`.com` ICP 已通过，上海服务器私有环境验证通过。当前等待腾讯云登录、完整网站备案号与真实咨询资料，再进行正式域名切换。
+- 正式生产上线：尚未执行；`.com` / `.cn` 的完整网站备案号均已核验，`.com` 备案号与企业名称已配置到生产环境，真实备案信息的生产构建通过。仍需完成服务器管理员配置、DNS/HTTPS、真实咨询入口及最终上线确认。
 - 权威进度：[`docs/launch/LAUNCH_STATUS.md`](docs/launch/LAUNCH_STATUS.md)
 
 ## 环境基线
