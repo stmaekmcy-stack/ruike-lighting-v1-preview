@@ -35,6 +35,7 @@ jobs:
       VITE_COMPANY_EMAIL: ${{ vars.COMPANY_EMAIL }}
       VITE_COMPANY_LEGAL_NAME: ${{ vars.COMPANY_LEGAL_NAME }}
       VITE_COMPANY_ADDRESS: ${{ vars.COMPANY_ADDRESS }}
+      VITE_COMPANY_ICP_NUMBER: ${{ vars.COMPANY_ICP_NUMBER }}
       SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
       SSH_PORT: ${{ secrets.PRODUCTION_SSH_PORT }}
       SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
@@ -60,6 +61,7 @@ jobs:
       - name: Validate production configuration
         run: |
           test -n "$VITE_SITE_URL"
+          test -n "$VITE_COMPANY_ICP_NUMBER"
           test "${VITE_SITE_URL#https://}" != "$VITE_SITE_URL"
           case "$VITE_SITE_URL" in
             *localhost*|*127.0.0.1*|*.github.io/*|*example.com/*) exit 1 ;;

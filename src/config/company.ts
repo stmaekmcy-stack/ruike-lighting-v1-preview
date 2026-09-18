@@ -24,6 +24,6 @@ export const companyConfig: CompanyConfig = {
   address: publicValue(import.meta.env.VITE_COMPANY_ADDRESS),
   wechatQr: 'assets/ruike-wechat-official.jpg',
   businessHours: null,
-  icpNumber: null,
+  icpNumber: publicValue(import.meta.env.VITE_COMPANY_ICP_NUMBER),
   policeRecordNumber: null,
 }

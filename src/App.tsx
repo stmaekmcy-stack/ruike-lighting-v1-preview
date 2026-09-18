@@ -862,6 +862,11 @@ function App() {
                 <address>{companyConfig.legalCompanyName} · {companyConfig.address}</address>
               ) : null}
               <span className="site-footer__links">
+                {companyConfig.icpNumber ? (
+                  <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">
+                    {companyConfig.icpNumber}
+                  </a>
+                ) : null}
                 <a href={withBasePath('privacy.html')}>隐私说明</a>
                 <a href={withBasePath('terms.html')}>网站使用条款</a>
               </span>

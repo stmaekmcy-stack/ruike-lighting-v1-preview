@@ -25,6 +25,7 @@ export default defineConfig(({ mode }) => {
   const publicEmail = env.VITE_COMPANY_EMAIL?.trim()
   const publicLegalName = env.VITE_COMPANY_LEGAL_NAME?.trim()
   const publicAddress = env.VITE_COMPANY_ADDRESS?.trim()
+  const publicIcpNumber = env.VITE_COMPANY_ICP_NUMBER?.trim()
   const formEndpoint = env.VITE_PROJECT_FORM_ENDPOINT?.trim()
   const hostname = new URL(siteUrl).hostname
   const isReservedHostname = hostname === 'localhost'
@@ -46,6 +47,9 @@ export default defineConfig(({ mode }) => {
     if ((env.VITE_BASE_PATH || '/') !== '/') {
       throw new Error('Production builds require VITE_BASE_PATH=/.')
     }
+    if (!publicIcpNumber) {
+      throw new Error('Production builds require the verified full website ICP record number.')
+    }
   }
 
   if (allowIndexing) {
@@ -59,6 +63,9 @@ export default defineConfig(({ mode }) => {
   }
   if (publicEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(publicEmail)) {
     throw new Error('VITE_COMPANY_EMAIL must contain a valid public email address.')
+  }
+  if (publicIcpNumber && !/^[\u4e00-\u9fff]ICP备\d+号-\d+$/.test(publicIcpNumber)) {
+    throw new Error('VITE_COMPANY_ICP_NUMBER must be the full website ICP record number, including its numeric suffix.')
   }
   if (formEndpoint && formEndpoint !== '/api/project-leads') {
     throw new Error('VITE_PROJECT_FORM_ENDPOINT must be /api/project-leads for the same-origin production receiver.')
