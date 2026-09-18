@@ -28,9 +28,11 @@ GitHub Actions 测试、构建、打包、校验和
 | `COMPANY_PHONE` | 真实对外电话；缺失时留空 |
 | `COMPANY_WECHAT_ID` | 真实对外微信号；缺失时留空 |
 | `COMPANY_EMAIL` | 真实对外邮箱；缺失时留空 |
-| `COMPANY_LEGAL_NAME` | 与营业执照逐字核验后的企业全称；未核验时留空 |
+| `COMPANY_LEGAL_NAME` | 已核验的企业全称；当前为腾讯云备案主体“上海瑞客莱照明有限公司” |
 | `COMPANY_ADDRESS` | 经企业确认可公开的真实地址；未确认时留空 |
 | `COMPANY_ICP_NUMBER` | 管局核准的完整网站备案号，必须包含网站序号后缀；未核验时生产构建会主动失败 |
+
+2026-09-18 已写入并读取核对的生产变量：`PRODUCTION_SITE_URL=https://ruikelight.com/`、`PRODUCTION_ALLOW_INDEXING=false`、`COMPANY_LEGAL_NAME=上海瑞客莱照明有限公司`、`COMPANY_ICP_NUMBER=沪ICP备2024099975号-5`。`.cn` 已核验备案号为“沪ICP备2024099975号-4”，只登记于域名记录，不用于 `.com` 构建。联系方式与表单变量仍为空。
 
 ### Secrets
 
