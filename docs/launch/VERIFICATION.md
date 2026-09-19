@@ -1,6 +1,6 @@
 # V1.0 上线验证记录
 
-日期：2026-09-18。范围：冻结视觉母版，仅修复真实使用与发布可靠性。
+更新时间：2026-09-19。范围：冻结视觉母版，仅处理真实使用与发布可靠性。生产构建/集成测试证据来自 2026-09-18；运维安装与 DNS 状态于 2026-09-19 再次复核。
 
 ## 当前执行证据
 
@@ -9,12 +9,21 @@
 | lint / typecheck / build | 通过 | 已用真实 `.com` 备案号、企业全称与正式域名完成生产模式构建；不是正式上线 |
 | 服务端测试 | 8 项通过 | 包含成功响应、限流、错误输入、投递失败、不泄露个人信息；模拟投递，不等于真实收件 |
 | 生产依赖审计 | 0 个漏洞 | `npm audit --omit=dev --audit-level=high` 当次结果 |
-| 运维脚本 | Bash 语法校验通过 | 未执行正式系统配置替换或上线切换 |
+| 运维安装 | 用户已执行，SSH 核验通过 | 发布/回滚脚本、systemd 与待启用 Nginx 文件匹配审核版本；未激活公网网站 |
 | 生产构建闸门 | 真实备案信息的构建通过，缺少完整网站号时仍主动失败 | `.com` 使用沪ICP备2024099975号-5；`.cn` 的 -4 未混入主站 |
 | 生产备案与元数据 | 静态检查通过 | 首页构建代码、3 个基础页面的完整备案号和工信部链接、正式 canonical、企业 JSON-LD、robots、sitemap、healthz 均核验；无开发占位文案 |
 | 目标服务器私有 Nginx 集成测试 | 通过 | 普通用户、随机回环端口、临时测试证书；未开放公网端口 |
 | 公网预发布 | GitHub Pages 持续提供 | 新版本以 Actions 成功和 `healthz.json` 的 release SHA 为准 |
-| 正式域名 / 证书 / 公网服务 | 未上线 | 备案已核验；页面控制连接仍超时，待管理员配置、DNS/TLS 及最终上线确认 |
+| 正式域名 / 证书 / 公网服务 | 未上线 | 备案及运维安装已核验；页面控制仍超时，待 DNS/TLS 及最终上线确认 |
+
+## 服务器安装及 DNS 复核（2026-09-19）
+
+- 用户在腾讯云管理员终端完成 `ruike-install-site`，截图显示安装成功并备份旧配置。已经通过 SSH 对安装后的发布、回滚、systemd 与 Nginx 待启用文件进行哈希和 root 所有权核验。
+- 本日再次核对已安装的发布/回滚脚本及待启用 Nginx 配置，与审核版本一致；`nginx.service` 与 `ruike-lead.service` 均 `disabled/inactive`，没有 80/443 监听，尚无激活的正式发布目录。
+- 查询权威 `storm.dnspod.net`：`ruikelight.com A` 为 NOERROR/0 条答案；`www.ruikelight.com A` 为 NXDOMAIN。没有把本轮解析准备记为已完成。
+- 腾讯云终端的 AX 读取 25 秒超时、DOM 读取 20 秒超时、新 DNS 标签初始状态 25 秒超时。已按浏览器官方排障指引尝试新页面，没有改用未经许可的浏览器控制通道或提取 Cookie/凭据。
+- 现有 Certbot 为 2.9.0，支持 `reconfigure`；尚未签发正式证书、接受证书协议或进行续期演练。[Certbot 官方说明](https://eff-certbot.readthedocs.io/en/stable/using.html#modifying-the-renewal-configuration-of-existing-certificates)作为后续续期配置依据，未以阅读文档冒充实际完成。
+- 本轮没有 UI 或业务代码改动，没有重复执行初始化，没有代替用户接受法律条款。
 
 ## 真实备案信息验证（2026-09-18）
 
@@ -25,7 +34,7 @@
 - 上传的安装、发布、回滚脚本 SHA256 与本地一致；没有执行安装或启用服务。测试后 `nginx.service` 与 `ruike-lead.service` 仍均为 `disabled/inactive`。
 - 公开 DNS 查询 `.com` / `.cn` 的根 A 记录及 `www` CNAME 仍无答案。未声称域名或 HTTPS 已经上线。
 
-尚需现有管理员会话执行的单步操作（先备份旧运维文件，不启动正式网站、不配置 DNS 或证书）：
+已由现有管理员会话执行的操作（已核验，不要重复安装）：
 
 ```bash
 sudo bash /home/ruike-deploy/ruike-verified-icp-20260918-1W0Hmp/ops/scripts/ruike-install-site /home/ruike-deploy/ruike-verified-icp-20260918-1W0Hmp
@@ -54,7 +63,7 @@ npm run verify:nginx
 
 ## 尚不能宣称通过
 
-- 腾讯云签发的正式证书及续期演练，正式 DNS、服务器系统配置安装、生产激活与真实回滚演练。
+- 正式域名证书及续期演练、正式 DNS、证书对应的最终 Nginx 配置启用、生产激活与真实回滚演练。运维脚本安装本身已经通过，不再列为待完成。
 - 当前版本的浏览器交互、console、iPhone / Android 真机、微信聊天内打开。浏览器连接超时，未用请求结果冒充交互测试。
 - 电话拨号、手机端微信复制：功能代码已建立，但正式电话和微信号尚未提供，当前页面不显示虚假字段。
 - 表单真实收件：收件人和 SMTP 未配置，生产表单关闭；已有公众号二维码继续显示。
