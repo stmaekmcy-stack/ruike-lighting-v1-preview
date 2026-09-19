@@ -14,10 +14,10 @@
 
 | 域名 | 购买状态 | DNS 状态 | 下一动作 |
 | --- | --- | --- | --- |
-| `ruikelight.com` | 已购买、实名、备案通过；沪ICP备2024099975号-5 | DNSPod 权威 NS 已生效；2026-09-19 查询权威 `storm.dnspod.net`：根 A 无答案，`www` 为 NXDOMAIN | 按本轮 DNS/HTTPS 准备授权建立解析；保持正式服务关闭，最终公开仍待确认 |
+| `ruikelight.com` | 已购买、实名、备案通过；沪ICP备2024099975号-5 | 2026-09-19 19:01 两台权威 DNS、公共解析器和目标服务器均核验通过：根 A 为 `124.220.205.94`，`www` CNAME 为 `ruikelight.com.` | 不重复添加 DNS；申请 HTTPS 证书并核验，最终公开仍待确认 |
 | `ruikelight.cn` | 已购买、备案通过；沪ICP备2024099975号-4 | DNSPod 权威 NS 已生效；2026-09-19 根 A 查询无答案，尚未配置保护跳转 | 单独完成保护跳转与 TLS 配置；无需重新提交备案 |
 
-## DNS 准备（本轮已授权；尚未保存）
+## DNS 记录（`.com` 已保存并核验）
 
 | 主机记录 | 类型 | 记录值 | TTL | 用途 |
 | --- | --- | --- | --- | --- |
@@ -34,7 +34,7 @@
 - `.cn` 虽已备案，但不能将其解析到尚未为该主机名配置 TLS 和跳转的服务上。
 - 正式上线后，对 `www` 做 HTTPS 301 跳转，canonical 统一指向主域名。
 
-操作入口：[腾讯云 DNSPod 控制台](https://console.cloud.tencent.com/cns)。本轮浏览器控制超时，打开页面请求处于排队状态，不能声称已进入记录页或已保存记录。[腾讯云添加解析说明](https://intl.cloud.tencent.com/zh/document/product/1295/76956)用于核对主机记录、默认线路和 TTL 的含义。
+操作入口：[腾讯云 DNSPod 控制台](https://console.cloud.tencent.com/cns)。用户已手动保存上述两条 `.com` 记录并提供截图，随后代理直接查询两台权威服务器完成独立验证；不能将用户保存说成代理自动写入。没有更改 NS、MX 或 `.cn`。[腾讯云添加解析说明](https://intl.cloud.tencent.com/zh/document/product/1295/76956)用于核对主机记录、默认线路和 TTL 的含义。
 
 ## 验收命令
 

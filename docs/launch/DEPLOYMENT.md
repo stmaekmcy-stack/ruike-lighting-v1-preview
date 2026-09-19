@@ -90,13 +90,13 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    sudo visudo -cf /etc/sudoers.d/ruike-deploy
    ```
 
-5. 用户最终确认且 `.com` DNS A/CNAME 生效后，只为 `ruikelight.com` 与 `www.ruikelight.com` 申请证书。`.cn` 暂不纳入；证书签发服务的法律协议由用户确认。
+5. `.com` DNS A/CNAME 生效后，在现有管理员会话中只为 `ruikelight.com` 与 `www.ruikelight.com` 申请证书。`.cn` 暂不纳入；由用户输入真实通知邮箱并自行确认证书签发服务协议，不自动同意条款。申请证书不启用正式网站，最终公开仍需单独“确认上线”。
 
    ```bash
    RUIKE_PRIMARY_DOMAIN=ruikelight.com
    RUIKE_WWW_DOMAIN=www.ruikelight.com
    sudo systemctl stop nginx
-   sudo certbot certonly --standalone \
+   sudo certbot certonly --standalone --cert-name ruikelight.com \
      -d "$RUIKE_PRIMARY_DOMAIN" -d "$RUIKE_WWW_DOMAIN"
    ```
 
