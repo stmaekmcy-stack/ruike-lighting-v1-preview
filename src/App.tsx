@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
 import { companyConfig } from './config/company'
 import { trackEvent, trackEventOnce } from './lib/analytics'
+import { brand } from './content/brand'
+import { knowledgePages } from './content/pages'
 
 type IconName = 'arrow' | 'chevron' | 'menu' | 'close' | 'plus' | 'arrowUp'
 
@@ -581,9 +583,9 @@ function App() {
           <div className="hero__edge-fade" />
           <SectionRail number="01" label="LIGHT AS RESULT" light />
           <div className="hero__content page-width">
-            <p className="hero__location">灯光效果交付品牌</p>
+            <p className="hero__location">{brand.name} · {brand.positioning}</p>
             <h1>
-              <span className="hero__promise">效果保障，</span>
+              <span className="hero__promise">瑞客照明 · 效果保障</span>
               <span className="title-line">让好灯光</span>
               <span className="title-line hero__result">看得见。</span>
             </h1>
@@ -614,12 +616,17 @@ function App() {
             </div>
             <div className="brand-section__body reveal-up">
               <p className="display-quote">不止卖灯，效果交付。</p>
+              <p className="body-copy">{brand.definition}</p>
               <p className="body-copy">
                 灯光效果，是灯光在真实空间以及实际使用、观看条件下，最终形成并被人感知到的视觉结果。
               </p>
               <a className="text-link" href="#standard">
                 了解瑞客的判断标准 <Icon name="arrow" />
               </a>
+              <nav className="geo-footer-links" aria-label="品牌与服务说明">
+                <a href={withBasePath('about/')}>关于瑞客</a>
+                <a href={withBasePath('lighting-delivery/')}>什么是灯光效果交付</a>
+              </nav>
             </div>
           </div>
           <div className="page-width brand-section__principles">
@@ -894,6 +901,9 @@ function App() {
                 <a href={withBasePath('privacy.html')}>隐私说明</a>
                 <a href={withBasePath('terms.html')}>网站使用条款</a>
               </span>
+              <nav className="geo-footer-links" aria-label="瑞客知识与案例">
+                {knowledgePages.map((page) => <a key={page.slug} href={withBasePath(`${page.slug}/`)}>{page.label}</a>)}
+              </nav>
             </div>
             <a className="back-top" href="#top" aria-label="返回顶部"><Icon name="arrowUp" /></a>
           </footer>
