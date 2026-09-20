@@ -1,8 +1,22 @@
 # V1.0 上线验证记录
 
-更新时间：2026-09-20。范围：冻结视觉母版，仅处理 HTTPS 准备与发布可靠性。本日重新执行生产构建检查及 HTTPS 准备脚本模拟测试；真实证书完整校验与续期仍待管理员执行，私有 Nginx 集成测试证据仍来自 2026-09-18。
+更新时间：2026-09-20。范围：冻结视觉母版，完成 HTTPS、正式部署与真实公网验收。以下最新记录取代后文历史阶段中的“未执行”“未上线”“等待扫码”等状态。
 
-## 当前执行证据
+## 正式主域名上线实测（2026-09-20 18:51—18:52 中国标准时间）
+
+- 网址：`https://ruikelight.com/`；版本 `0cbe1fc9396604ffe46195e4d54350889244c688`；生产 Actions [35506036575](https://github.com/stmaekmcy-stack/ruike-lighting-v1-preview/actions/runs/35506036575) 成功。`/healthz` 与服务器 current 相同；Nginx enabled/active。
+- 真实 HTTPS 准备于 18:20 通过。证书覆盖 `.com`/`www`，有效期至 2026-12-18 22:44:50 UTC；链与密钥匹配核验通过。Certbot webroot staging 续期通过，timer enabled/active，配置保存 Nginx reload hook；没有导出私钥。
+- 首次生产 run `35504944104` 的公网检查超时并成功自动回滚；腾讯云缺少 TCP443 规则是已核实原因。已仅新增这一条 HTTPS 公网规则，原 TCP22/80/ICMP 不变。主机 UFW 原为 inactive，只读检查，未降低主机防护设置。
+- 当前发布真实执行 lint/typecheck/build，24 项接口/运维测试和 5 项 GEO 测试全部通过；PR Quality 含依赖审计与 Nginx 私有集成测试也通过。保留 GEO 六个知识页，没有更改当前首页视觉。
+- 正式 HTTPS 的首页、六个知识页、隐私、条款、robots、sitemap、llms、healthz、favicon 共 14 路由返回 200。HTTP 主域名、HTTP www、HTTPS www 都 301 到唯一 HTTPS 主域名；不存在页面、静态资源和内部文档路径返回 404。
+- CSP/HSTS 响应头存在，完整 ICP 号与 canonical 正确；公开 HTML 无待补充、开发环境、PROJECT IMAGE、CONTENT PENDING 等占位内容。
+- 实际 Chrome 浏览器以 1440/390/430 宽度打开公网域名。每种尺寸均实际点击首屏/导航或手机菜单/产品区 CTA、返回顶部、七步第七项再恢复第一项。目标咨询区真实可见，手机菜单正确关闭，展开状态唯一。
+- 三种尺寸均无 console error、pageerror、失败资源；实际 scrollWidth 等于 viewport 宽度，全部图片加载成功。五项标准/七步数量及首屏两行“让好灯光 / 看得见。”核验通过；全页截图已生成并人工查看桌面与 390 版本，未调整 UI。
+- 生产表单、电话、微信号复制按钮按未配置状态不渲染；官方公众号二维码实际加载。接口实际返回 503/ok:false，未声称收到测试咨询。事件结构通过，但无正式统计平台接收验证。
+- 受控首发仍 noindex，sitemap 为空；公网检查通过后下一发布开放正式索引，预览持续 noindex。
+- 明确边界：浏览器尺寸模拟不是 iPhone/Android 真机，也不是微信聊天内打开；电话/客服微信和真实表单接收资料缺失。`.cn` 保护跳转仍未配置。Mac 默认代理有一次独立 curl TLS 错误，直接连接及三组真实浏览器全部通过；未修改全局代理。
+
+## 历史准备阶段证据（以下未完成状态已被上方实测取代）
 
 | 检查 | 结果 | 边界 |
 | --- | --- | --- |
