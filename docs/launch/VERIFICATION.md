@@ -2,6 +2,18 @@
 
 更新时间：2026-09-20。范围：冻结视觉母版，完成 HTTPS、正式部署与真实公网验收。以下最新记录取代后文历史阶段中的“未执行”“未上线”“等待扫码”等状态。
 
+## `.cn` 域名接通（2026-09-20 19:45 中国标准时间）
+
+- Codex 在已登录 DNSPod 控制台确认 `.cn` 原为零条记录，新增 `@ A 124.220.205.94` 和 `www CNAME ruikelight.cn`，默认线路、TTL 600；保存成功并回读列表。未修改 `.com`、NS、MX、AAAA 或购买套餐。
+- 两台权威 DNS、公共解析器 223.5.5.5 / 1.1.1.1、上海服务器均解析正确。两个主机名的真实 TLS 链验证通过；SAN 覆盖两者，到期时间 2026-12-19 10:44:01 UTC。
+- 在现有管理员会话中以 webroot 方式单独签发 `.cn` 证书；未 stop/restart Nginx，未重签 `.com`，未导出私钥或代接受新协议。Certbot timer enabled/active，webroot 和 reload hook 已核验，真实 staging 续期（含运行 deploy hook）通过。
+- 公网 8 条 HTTP/HTTPS × 根域名/www × 首页/带编码查询参数路径检查全部 301 到准确的 `.com` 地址。ACME 未知 token 仍本地 404；两个 HTTPS 入口最终 200、canonical 统一为 `.com`、页脚保持 `-5`，不产生重复站点。
+- 主站配置 SHA256 前后保持 `ab7e723db22bf37848675a70d7071476c493ce5024af3822d4bca74b06d91e31`；新别名配置为 `5e1dc73ee6bc3a8a41c04f21b9d86703d993422dff192c85441ede3f68913ab2`。正式 current 与公网 health 始终为 `be80b05819053ea0ec99af35f78e5312c5b98cf3`。Nginx enabled/active。
+- 管理员操作前保留备份，TLS 启用备份为 `/etc/ruike-lighting/ops-backups/cn-WETJZh`。第一次 HTTP 引导检查恰逢旧 worker 退出，触发安全回滚并保留失败现场；脚本加入最多 8 次一秒间隔的连接错误重试后通过。TLS 激活同样等待 graceful reload 生效后验证，不忽略证书错误。既有 Nginx `protocol options redefined` 警告为共享监听参数提示，`nginx -t` 成功，未擅改冻结的主站配置。
+- lint / typecheck / 28 项接口及运维测试 / 5 项 GEO 测试 / preview 与 production build 均通过。生产构建保持 10 HTML、7 schema、128 内部链接资源、9 sitemap URL。服务器私有 Nginx 集成测试通过，包括 `.cn` 两主机名跳转和 ACME 路径。
+- 未修改 `src/`、`public/`、页面文案、布局、导航、表单、依赖或 `.com` DNS。真实咨询资料与真机/微信内验收仍按原有边界，不由域名成功推定为完成。
+- 原始公网报告与操作截图存档于本任务可视化目录 `瑞客官网CN域名接通_2026-09-20`；只读复验入口为 `node ops/scripts/verify-cn-live.mjs`。
+
 ## 最终正式索引版复验（2026-09-20 19:01—19:02 中国标准时间）
 
 - 生产 [35506459749](https://github.com/stmaekmcy-stack/ruike-lighting-v1-preview/actions/runs/35506459749) 成功，正式版本 `be80b05819053ea0ec99af35f78e5312c5b98cf3`，标签 `v1.0.0-live-20260920`。
