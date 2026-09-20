@@ -2,6 +2,15 @@
 
 更新时间：2026-09-20。范围：冻结视觉母版，完成 HTTPS、正式部署与真实公网验收。以下最新记录取代后文历史阶段中的“未执行”“未上线”“等待扫码”等状态。
 
+## 最终正式索引版复验（2026-09-20 19:01—19:02 中国标准时间）
+
+- 生产 [35506459749](https://github.com/stmaekmcy-stack/ruike-lighting-v1-preview/actions/runs/35506459749) 成功，正式版本 `be80b05819053ea0ec99af35f78e5312c5b98cf3`，标签 `v1.0.0-live-20260920`。
+- `/healthz`、服务器 current、构建提交一致；previous 为已通过的 `0cbe1fc9396604ffe46195e4d54350889244c688`。Nginx enabled/active，未配置的咨询服务 inactive。
+- 重新对 14 条公网路由、HTTP/www 跳转、404、生产内容、CSP/HSTS 与 1440/390/430 浏览器真实交互运行完整验收，全部通过。三种尺寸无横向溢出、图片/资源失败、console error 或 pageerror。最终版本完整长截图和 JSON 报告已存档。
+- 正式 robots Allow、首页及知识页 index/follow、9 个 sitemap URL、llms 的 6 个品牌知识页链接均通过检查。www 跳转实测保留 `/about/?source=launch-check` 路径与查询参数。预览 [35506437537](https://github.com/stmaekmcy-stack/ruike-lighting-v1-preview/actions/runs/35506437537) 成功，预览 robots 仍 Disallow，不混入正式信源。
+- 最终生产日志实测：24 项接口/运维测试 + 5 项 GEO 测试，失败 0；lint/typecheck/build 通过；构建验证 10 HTML / 7 schema / 128 内部链接资源 / 9 sitemap URL。
+- 没有手机真实硬件、微信聊天内或真实表单接收端证据；不将浏览器模拟当作这些测试。电话/客服微信号尚未配置，公众号二维码是真实启用入口。`.cn` 与 www 的 A 记录本轮公共 DNS 再查仍无结果，保护跳转不属于已完成项。
+
 ## 正式主域名上线实测（2026-09-20 18:51—18:52 中国标准时间）
 
 - 网址：`https://ruikelight.com/`；版本 `0cbe1fc9396604ffe46195e4d54350889244c688`；生产 Actions [35506036575](https://github.com/stmaekmcy-stack/ruike-lighting-v1-preview/actions/runs/35506036575) 成功。`/healthz` 与服务器 current 相同；Nginx enabled/active。
