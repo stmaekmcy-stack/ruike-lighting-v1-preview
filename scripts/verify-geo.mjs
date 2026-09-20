@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { resolve, join } from 'node:path'
 import { loadEnv } from 'vite'
 import { SITE_URL, resolveSiteConfig } from '../src/config/site.ts'
+import { assertVisibleFaq } from './visible-faq.mjs'
 
 const env = { ...loadEnv('production', process.cwd(), ''), ...process.env }
 const { allowIndexing, base } = resolveSiteConfig(env)
@@ -37,10 +38,7 @@ for (const file of htmlFiles) {
     assert.equal(schema['@context'], 'https://schema.org')
     for (const type of ['Organization', 'WebSite', 'Service']) assert.ok(schema['@graph'].some((item) => item['@type'] === type), `${relative}: ${type}`)
     const faq = schema['@graph'].find((item) => item['@type'] === 'FAQPage')
-    for (const question of faq?.mainEntity || []) {
-      assert.ok(decode(html).includes(question.name), 'FAQ question must be visible')
-      assert.ok(decode(html).includes(question.acceptedAnswer.text), 'FAQ answer must be visible')
-    }
+    assertVisibleFaq(html, faq?.mainEntity || [])
     assert.doesNotMatch(match[1], /AggregateRating|Review|award|ratingValue|sameAs/)
     graphsChecked++
   }
