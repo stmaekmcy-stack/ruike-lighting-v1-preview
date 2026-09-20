@@ -14,7 +14,7 @@
 
 | 域名 | 购买状态 | DNS 状态 | 下一动作 |
 | --- | --- | --- | --- |
-| `ruikelight.com` | 已购买、实名、备案通过；沪ICP备2024099975号-5 | 2026-09-19 19:01 两台权威 DNS、公共解析器和目标服务器均核验通过：根 A 为 `124.220.205.94`，`www` CNAME 为 `ruikelight.com.` | 不重复添加 DNS；申请 HTTPS 证书并核验，最终公开仍待确认 |
+| `ruikelight.com` | 已购买、实名、备案通过；沪ICP备2024099975号-5 | 根 A 为 `124.220.205.94`，`www` CNAME 为 `ruikelight.com.`；2026-09-20 正式 HTTPS 已上线，证书和真实 webroot staging 续期通过 | 不重复添加 DNS 或申请证书；HTTP/www 均 301 到 `https://ruikelight.com/` |
 | `ruikelight.cn` | 已购买、备案通过；沪ICP备2024099975号-4 | DNSPod 权威 NS 已生效；2026-09-19 根 A 查询无答案，尚未配置保护跳转 | 单独完成保护跳转与 TLS 配置；无需重新提交备案 |
 
 ## DNS 记录（`.com` 已保存并核验）
