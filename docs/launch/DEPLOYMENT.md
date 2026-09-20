@@ -90,13 +90,13 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    sudo visudo -cf /etc/sudoers.d/ruike-deploy
    ```
 
-5. 用户最终确认且 `.com` DNS A/CNAME 生效后，只为 `ruikelight.com` 与 `www.ruikelight.com` 申请证书。`.cn` 暂不纳入；证书签发服务的法律协议由用户确认。
+5. `.com` DNS A/CNAME 生效后，在现有管理员会话中只为 `ruikelight.com` 与 `www.ruikelight.com` 申请证书。`.cn` 暂不纳入；由用户输入真实通知邮箱并自行确认证书签发服务协议，不自动同意条款。申请证书不启用正式网站，最终公开仍需单独“确认上线”。
 
    ```bash
    RUIKE_PRIMARY_DOMAIN=ruikelight.com
    RUIKE_WWW_DOMAIN=www.ruikelight.com
    sudo systemctl stop nginx
-   sudo certbot certonly --standalone \
+   sudo certbot certonly --standalone --cert-name ruikelight.com \
      -d "$RUIKE_PRIMARY_DOMAIN" -d "$RUIKE_WWW_DOMAIN"
    ```
 
@@ -105,6 +105,16 @@ SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务�
    ```bash
    sudo bash ops/scripts/ruike-install-site "$(pwd)"
    ```
+
+   **当前服务器已完成该安装，不要重复执行。** 用户于 2026-09-20 在管理员终端发起证书申请并自行确认协议，服务器已生成该域名的续期文件。初次上线准备统一使用经审核的脚本：
+
+   ```bash
+   sudo bash ops/scripts/ruike-prepare-https
+   ```
+
+   该脚本仅适用于本仓库对应的初次上线状态，固定校验待启用 Nginx 配置哈希、服务器 IP、域名、证书链、有效期及密钥匹配。不扩展发布账号的 sudo 权限，不启动正式首页，不自动接受证书协议。它临时启动只提供 ACME 验证路径的 80 端口监听，其他路径返回 404；Certbot `reconfigure` 通过真实 staging 续期演练后，保存 webroot 和续期重载钩子，然后关闭临时监听。最后备份并准备正式 Nginx 配置、运行 `nginx -t`，仍不启动正式服务。
+
+   成功结果保存在 `/var/lib/ruike-lighting/https-readiness.txt`，只含公开证书元数据与检查状态，不包含私钥、账号邮箱或表单信息。失败时恢复本次改动的配置并保留 `/etc/ruike-lighting/ops-backups/https-*` 备份；未知虚拟主机、已运行服务或已有 current 会使脚本停止，不触碰已有网站。只有读取实际成功报告后才能标记证书及续期已验证；模拟测试通过不能代替管理员实测。该脚本成功后跳过下面的手动配置步骤，最终激活仍须用户确认。
 
    证书存在且用户确认上线后，将待启用配置安装到正式位置。初次安装时检查 `sites-enabled/default`，若仍指向发行版默认站点，先将该软链接移至本次运维备份目录，避免重复 `default_server`。不得删除无关虚拟主机。
 
