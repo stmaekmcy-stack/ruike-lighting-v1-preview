@@ -23,7 +23,6 @@ jobs:
     env:
       VITE_DEPLOYMENT_TARGET: preview
       VITE_BASE_PATH: /ruike-lighting-v1-preview/
-      VITE_SITE_URL: https://stmaekmcy-stack.github.io/ruike-lighting-v1-preview/
       VITE_ALLOW_INDEXING: false
       RUIKE_RELEASE_ID: ${{ github.sha }}
     steps:
