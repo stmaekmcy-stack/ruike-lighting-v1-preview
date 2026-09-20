@@ -6,6 +6,19 @@
 
 ## 目标架构
 
+### 已启用的 `.cn` 别名（2026-09-20）
+
+`ruikelight.cn` 和 `www.ruikelight.cn` 使用独立的 `/etc/nginx/sites-available/ruike-lighting-cn.conf`、同名 enabled 软链接及 `/etc/letsencrypt/live/ruikelight.cn/` 证书目录。仅做 301 到 `https://ruikelight.com$request_uri`，不提供第二套网页；页脚、canonical、构建变量与 `.com` 发布版本不变。
+
+- 仓库真源：`ops/nginx/ruike-lighting-cn.conf`。首次 HTTP-01 引导文件为 `ruike-lighting-cn.http.conf`，现已被完整 TLS 配置替换。
+- 管理员脚本：`bash ops/scripts/ruike-configure-cn prepare|activate`。当前已经完成，不重复运行 prepare（脚本也禁止从 TLS 降级）。脚本固定目标和配置哈希，备份后 `nginx -t` 与 graceful reload，不 stop/restart 主站；失败恢复别名配置并复查主站。
+- 签发复用现有 ACME 账户及 webroot，不自动接受新协议，不改 `.com` 证书。续期文件为 webroot，保存 `/usr/bin/systemctl reload nginx` hook，既有 timer enabled/active。`certbot renew --cert-name ruikelight.cn --dry-run --non-interactive --no-random-sleep-on-renew --run-deploy-hooks` 已真实通过。
+- 启用前备份：`/etc/ruike-lighting/ops-backups/cn-WETJZh`，含原 HTTP 别名配置与未变的主站配置；失败产物同样保留，未删除用户文件。需要回退时由管理员核验该备份后仅恢复别名文件，`nginx -t` 通过后 reload；不得改 current/previous 或 `.com` 配置。退回 HTTP 引导会暂时失去 `.cn` HTTPS，因此正常运行中不执行。
+- CI 继续校验主站运维哈希，并新增已启用 `.cn` 文件及软链接校验；未扩展部署账号 sudo 权限。页面发布/回滚不会覆盖这份独立别名配置。
+- 公网回验：`node ops/scripts/verify-cn-live.mjs`。服务器普通用户运行 `verify-nginx.mjs` 可在随机回环端口验证两套虚拟主机共存、重定向及 ACME 路径，不使用生产私钥。
+
+本轮只新增域名入口，生产页面仍为 `be80b05819053ea0ec99af35f78e5312c5b98cf3`，无需为了运维文档重新发布页面。
+
 ```text
 GitHub main / 版本标签
         ↓ 手动生产发布（需确认字串 + production environment）

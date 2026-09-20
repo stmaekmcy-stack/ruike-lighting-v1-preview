@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+# Administrator-only additive alias setup; does not deploy or restart the main site.
+set -Eeuo pipefail
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+umask 077
+fail() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+[ "$(id -u)" = 0 ] || fail 'Use the existing administrator session.'
+[ "$#" = 1 ] || fail 'Expected prepare or activate.'
+case "$1" in
+  prepare) filename=ruike-lighting-cn.http.conf; approved=d4b456af6f3d3e22a5443a667ca6f64360ae18273cb9e6b1c048465c598c4578 ;;
+  activate) filename=ruike-lighting-cn.conf; approved=5e1dc73ee6bc3a8a41c04f21b9d86703d993422dff192c85441ede3f68913ab2 ;;
+  *) fail 'Expected prepare or activate.' ;;
+esac
+mode=$1
+source_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../nginx" && pwd -P)"
+source_file="$source_dir/$filename"
+config=/etc/nginx/sites-available/ruike-lighting-cn.conf
+enabled=/etc/nginx/sites-enabled/ruike-lighting-cn.conf
+primary=/etc/nginx/sites-available/ruike-lighting.conf
+cert_dir=/etc/letsencrypt/live/ruikelight.cn
+renewal=/etc/letsencrypt/renewal/ruikelight.cn.conf
+backup=""
+changed=false
+new_link=false
+success=false
+hash() { sha256sum "$1" | awk '{print $1}'; }
+safe_dir() {
+  [ -d "$1" ] && [ ! -L "$1" ] && [ "$(readlink -f "$1")" = "$1" ] || fail "Unsafe directory: $1"
+  [ "$(stat -c %u "$1")" = 0 ] || fail "Not root-owned: $1"
+  local permissions
+  permissions="$(stat -c %a "$1")"
+  [ "$((8#$permissions & 022))" = 0 ] || fail "Writable directory: $1"
+}
+cleanup() {
+  local result=$?
+  trap - EXIT INT TERM
+  set +e
+  if [ "$changed" = true ] && [ "$success" != true ]; then
+    if [ "$new_link" = true ]; then mv "$enabled" "$backup/failed-enabled-link"; fi
+    if [ -f "$backup/cn.conf" ]; then cp -p "$backup/cn.conf" "$config"; else mv "$config" "$backup/failed-cn.conf"; fi
+    if nginx -t && systemctl reload nginx; then
+      printf 'Alias change rolled back; main site preserved. Backup: %s\n' "$backup" >&2
+    else
+      printf 'ERROR: rollback validation failed. Inspect %s before further changes.\n' "$backup" >&2
+    fi
+  fi
+  exit "$result"
+}
+trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
+exec 9>/run/lock/ruike-cn-configure.lock
+flock -n 9 || fail 'Another alias change is running.'
+for directory in /etc/nginx/sites-available /etc/nginx/sites-enabled /etc/ruike-lighting/ops-backups; do safe_dir "$directory"; done
+[ "$(hash "$source_file")" = "$approved" ] || fail 'Source configuration differs from the reviewed hash.'
+[ "$(hash "$primary")" = ab7e723db22bf37848675a70d7071476c493ce5024af3822d4bca74b06d91e31 ] || fail 'Main site configuration drift; inspect before proceeding.'
+systemctl is-active --quiet nginx || fail 'The main site must already be running.'
+nginx -t
+before_release="$(readlink -f /srv/ruike-lighting/current)"
+before_health="$(curl --noproxy '*' -fsS --max-time 10 --resolve ruikelight.com:443:127.0.0.1 https://ruikelight.com/healthz)"
+if [ -e "$config" ] || [ -L "$config" ]; then
+  [ -f "$config" ] && [ ! -L "$config" ] || fail 'Unexpected alias configuration.'
+  existing="$(hash "$config")"
+  case "$existing" in
+    d4b456af6f3d3e22a5443a667ca6f64360ae18273cb9e6b1c048465c598c4578) ;;
+    5e1dc73ee6bc3a8a41c04f21b9d86703d993422dff192c85441ede3f68913ab2) [ "$mode" != prepare ] || fail 'TLS alias is already active; do not downgrade.' ;;
+    *) fail 'Unknown alias configuration; leave it untouched.' ;;
+  esac
+fi
+if [ -e "$enabled" ] || [ -L "$enabled" ]; then
+  [ -L "$enabled" ] && [ "$(readlink "$enabled")" = "$config" ] || fail 'Unexpected enabled alias.'
+fi
+if [ "$mode" = activate ]; then
+  for domain in ruikelight.cn www.ruikelight.cn; do
+    [ "$(getent ahostsv4 "$domain" | awk '{print $1}' | sort -u)" = 124.220.205.94 ] || fail "Wrong DNS: $domain"
+    openssl verify -purpose sslserver -verify_hostname "$domain" -untrusted "$cert_dir/chain.pem" "$cert_dir/cert.pem"
+  done
+  openssl x509 -in "$cert_dir/cert.pem" -noout -checkend 604800
+  cert_key="$(openssl x509 -in "$cert_dir/cert.pem" -pubkey -noout | openssl sha256)"
+  private_key="$(openssl pkey -in "$cert_dir/privkey.pem" -pubout | openssl sha256)"
+  [ "$cert_key" = "$private_key" ] || fail 'Certificate/key mismatch.'
+  grep -Eq '^authenticator[[:space:]]*=[[:space:]]*webroot[[:space:]]*$' "$renewal" || fail 'Renewal is not webroot.'
+  grep -Eq '^(deploy_hook|renew_hook) = /usr/bin/systemctl reload nginx$' "$renewal" || fail 'Missing renewal reload hook.'
+  systemctl is-enabled --quiet certbot.timer
+  systemctl is-active --quiet certbot.timer
+fi
+backup="$(mktemp -d /etc/ruike-lighting/ops-backups/cn-XXXXXX)"
+cp -p "$primary" "$backup/main-unchanged.conf"
+if [ -f "$config" ]; then cp -p "$config" "$backup/cn.conf"; fi
+changed=true
+install -m 0644 "$source_file" "$config"
+if [ ! -L "$enabled" ]; then ln -s "$config" "$enabled"; new_link=true; fi
+nginx -t
+systemctl reload nginx
+systemctl is-active --quiet nginx
+[ "$(hash "$primary")" = ab7e723db22bf37848675a70d7071476c493ce5024af3822d4bca74b06d91e31 ] || fail 'Main configuration changed.'
+[ "$(readlink -f /srv/ruike-lighting/current)" = "$before_release" ] || fail 'Main release changed.'
+[ "$(curl --noproxy '*' -fsS --max-time 10 --resolve ruikelight.com:443:127.0.0.1 https://ruikelight.com/healthz)" = "$before_health" ] || fail 'Main site health changed.'
+for domain in ruikelight.cn www.ruikelight.cn; do
+  protocol=http; port=80
+  if [ "$mode" = activate ]; then protocol=https; port=443; fi
+  # Reload is graceful: allow new workers to pick up the alias before checking it.
+  response="$(curl --noproxy '*' -sSI --max-time 10 --retry 8 --retry-all-errors --retry-delay 1 --resolve "$domain:$port:127.0.0.1" "$protocol://$domain/privacy.html?source=cn")"
+  printf '%s\n' "$response" | grep -Eq '^HTTP/[^ ]+ 301' || fail "Alias status failed: $domain"
+  printf '%s\n' "$response" | tr -d '\r' | grep -Fiqx 'Location: https://ruikelight.com/privacy.html?source=cn' || fail "Alias destination failed: $domain"
+done
+success=true
+printf 'CN_%s_OK\nbackup=%s\nprimary_release=%s\n' "$mode" "$backup" "$before_release"

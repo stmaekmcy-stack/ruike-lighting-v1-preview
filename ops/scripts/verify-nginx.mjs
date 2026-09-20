@@ -3,7 +3,7 @@
 import assert from 'node:assert/strict'
 import { spawn, spawnSync } from 'node:child_process'
 import { once } from 'node:events'
-import { cpSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import net from 'node:net'
 import { tmpdir } from 'node:os'
 import { join, resolve } from 'node:path'
@@ -33,10 +33,14 @@ try {
   const unusedApiPort = await freePort()
   const certificate = join(temporary, 'certificate.pem')
   const key = join(temporary, 'key.pem')
-  run('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '1', '-subj', '/CN=ruikelight.com', '-addext', 'subjectAltName=DNS:ruikelight.com,DNS:www.ruikelight.com', '-keyout', key, '-out', certificate])
+  run('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-days', '1', '-subj', '/CN=ruikelight.com', '-addext', 'subjectAltName=DNS:ruikelight.com,DNS:www.ruikelight.com,DNS:ruikelight.cn,DNS:www.ruikelight.cn', '-keyout', key, '-out', certificate])
   const template = readFileSync(join(repo, 'ops/nginx/ruike-lighting.conf.template'), 'utf8')
   assert.doesNotMatch(template, /__CN_|ruikelight\.cn/)
-  const config = template
+  const alias = readFileSync(join(repo, 'ops/nginx/ruike-lighting-cn.conf'), 'utf8')
+  const webroot = join(temporary, 'acme')
+  mkdirSync(join(webroot, '.well-known/acme-challenge'), { recursive: true })
+  writeFileSync(join(webroot, '.well-known/acme-challenge/alias-check'), 'acme-ok')
+  const config = (template + '\n' + alias)
     .replaceAll('__PRIMARY_DOMAIN__', 'ruikelight.com')
     .replaceAll('__WWW_DOMAIN__', 'www.ruikelight.com')
     .replace(/listen \[::\]:[^;]+;/g, '')
@@ -45,6 +49,9 @@ try {
     .replaceAll('/srv/ruike-lighting/current/dist', join(temporary, 'dist'))
     .replaceAll('/etc/letsencrypt/live/ruikelight.com/fullchain.pem', certificate)
     .replaceAll('/etc/letsencrypt/live/ruikelight.com/privkey.pem', key)
+    .replaceAll('/etc/letsencrypt/live/ruikelight.cn/fullchain.pem', certificate)
+    .replaceAll('/etc/letsencrypt/live/ruikelight.cn/privkey.pem', key)
+    .replaceAll('/var/www/letsencrypt', webroot)
     .replaceAll('127.0.0.1:8787', `127.0.0.1:${unusedApiPort}`)
   const configPath = join(temporary, 'nginx.conf')
   writeFileSync(configPath, `pid ${temporary}/nginx.pid;\nerror_log ${temporary}/error.log;\nevents { worker_connections 64; }\nhttp { include /etc/nginx/mime.types; access_log off; client_body_temp_path ${temporary}/body; proxy_temp_path ${temporary}/proxy; ${config} }\n`)
@@ -77,6 +84,15 @@ try {
   assert.match(request('/.env'), /HTTP\/(?:1\.1|2) 403/)
   assert.match(request('/#start', { secure: false }), /Location: https:\/\/ruikelight\.com\//i)
   assert.match(request('/privacy.html', { domain: 'www.ruikelight.com' }), /Location: https:\/\/ruikelight\.com\/privacy\.html/i)
+  for (const domain of ['ruikelight.cn', 'www.ruikelight.cn']) {
+    for (const secure of [false, true]) {
+      const redirect = request('/privacy.html?source=cn&next=%2Fabout%2F', { domain, secure })
+      assert.match(redirect, /HTTP\/(?:1\.1|2) 301/)
+      assert.match(redirect, /Location: https:\/\/ruikelight\.com\/privacy\.html\?source=cn&next=%2Fabout%2F\r?\n/i)
+    }
+    assert.match(request('/.well-known/acme-challenge/alias-check', { domain, secure: false }), /acme-ok/)
+    assert.match(request('/.well-known/acme-challenge/missing', { domain, secure: false }), /HTTP\/(?:1\.1|2) 404/)
+  }
   const health = request('/healthz')
   assert.match(health, /"status":"ok"/)
   const expected = JSON.parse(readFileSync(join(temporary, 'dist/healthz.json'), 'utf8'))
@@ -87,7 +103,7 @@ try {
   const failedLead = request('/api/project-leads', { method: 'POST' })
   assert.match(failedLead, /HTTP\/(?:1\.1|2) 503/)
   assert.match(failedLead, /"ok":false/)
-  process.stdout.write(JSON.stringify({ status: 'passed', release: expected.release, checks: ['https', 'homepage', 'legal-pages', 'images', '404', 'headers', 'redirects', 'health-fails-closed', 'lead-unavailable'], publicListenersOpened: false }) + '\n')
+  process.stdout.write(JSON.stringify({ status: 'passed', release: expected.release, checks: ['https', 'homepage', 'legal-pages', 'images', '404', 'headers', 'redirects', 'cn-https-redirects', 'cn-acme-renewal-path', 'health-fails-closed', 'lead-unavailable'], publicListenersOpened: false }) + '\n')
 } finally {
   if (nginx && nginx.exitCode === null) {
     nginx.kill('SIGQUIT')
