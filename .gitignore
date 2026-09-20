@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.prerender/
 qa-*.png
 .DS_Store
 *.tsbuildinfo
