@@ -31,7 +31,7 @@ export function schemaFor(page?: KnowledgePage) {
       description: page?.description || brand.description,
       inLanguage: 'zh-CN', isPartOf: { '@id': `${SITE_URL}#website` },
       about: { '@id': `${SITE_URL}#organization` },
-      ...(page ? { dateModified: brand.updated, hasPart: { '@id': `${url}#faq` } } : {}),
+      ...(page ? { dateModified: page.updated || brand.updated, hasPart: { '@id': `${url}#faq` } } : {}),
     },
   ]
   if (page) graph.push(
