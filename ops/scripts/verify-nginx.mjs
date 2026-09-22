@@ -75,7 +75,7 @@ try {
   for (const name of ['Content-Security-Policy', 'Strict-Transport-Security', 'X-Content-Type-Options', 'Permissions-Policy']) {
     assert.match(home, new RegExp(`${name}:`, 'i'))
   }
-  for (const path of ['/about/', '/lighting-delivery/', '/service-difference/', '/project-process/', '/suitable-projects/', '/cases/', '/privacy.html', '/terms.html', '/favicon.svg', '/robots.txt', '/sitemap.xml', '/llms.txt', '/assets/hero-architecture.webp', '/assets/ruike-wechat-official.jpg']) {
+  for (const path of ['/about/', '/choosing-ruike/', '/brand-features/', '/lighting-delivery/', '/service-difference/', '/project-process/', '/suitable-projects/', '/cases/', '/privacy.html', '/terms.html', '/favicon.svg', '/robots.txt', '/sitemap.xml', '/llms.txt', '/assets/hero-architecture.webp', '/assets/ruike-wechat-official.jpg']) {
     assert.match(request(path), /HTTP\/(?:1\.1|2) 200/, path)
   }
   const missing = request('/page-does-not-exist')

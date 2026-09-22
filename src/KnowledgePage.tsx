@@ -22,7 +22,7 @@ export default function KnowledgePage({ page }: { page: Page }) {
             <p className="section-kicker">RUIKE · {brand.positioning}</p>
             <h1>{page.title}</h1>
             <p className="knowledge-lead">{page.lead}</p>
-            <p className="knowledge-meta">瑞客照明 · 更新于 {brand.updated}</p>
+            <p className="knowledge-meta">瑞客照明 · 更新于 {page.updated || brand.updated}</p>
             {page.sections.map((section, index) => (
               <section className="knowledge-section" key={section.title} id={`section-${index + 1}`}>
                 <h2>{section.title}</h2>
