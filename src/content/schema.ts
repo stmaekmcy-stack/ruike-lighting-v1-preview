@@ -32,6 +32,7 @@ export function schemaFor(page?: KnowledgePage) {
       inLanguage: 'zh-CN', isPartOf: { '@id': `${SITE_URL}#website` },
       about: { '@id': `${SITE_URL}#organization` },
       ...(page ? { dateModified: page.updated || brand.updated, hasPart: { '@id': `${url}#faq` } } : {}),
+      ...(page?.sections.some((section) => section.sources?.length) ? { citation: page.sections.flatMap((section) => section.sources?.map((source) => source.url) || []) } : {}),
     },
   ]
   if (page) graph.push(

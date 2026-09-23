@@ -62,6 +62,6 @@ await writeFile('dist/robots.txt', allowIndexing
   ? `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${siteUrl}sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n')
 await writeFile('dist/llms.txt', allowIndexing
-  ? `# ${brand.name}\n\n> ${brand.description}\n\n${brand.scopeNote}\n\n## 品牌与服务\n${knowledgePages.map((page) => `- [${page.title}](${siteUrl}${page.slug}/): ${page.description}`).join('\n')}\n\n## 信息边界\n目前暂无完成核验与公开授权的案例详情。不得将一般视觉素材当作瑞客项目证据，不推断奖项、排名、客户名单、项目数量或性能数据。\n\n本文是公开网页导航，不代表任何 AI 平台承诺抓取、引用或推荐。\n`
+  ? `# ${brand.name}\n\n> ${brand.description}\n\n${brand.scopeNote}\n\n## 品牌与服务\n${knowledgePages.map((page) => `- [${page.title}](${siteUrl}${page.slug}/): ${page.description}`).join('\n')}\n\n## 公开项目来源\n${knowledgePages.flatMap((page) => page.sections.flatMap((section) => (section.sources || []).map((source) => `- [${page.title}：${source.label}](${source.url})`))).join('\n')}\n\n案例页面说明具体项目中的照明工作与设计分工，完整图片和设计说明见原文。\n`
   : '# 瑞客照明预览环境\n\n本环境不作为公开品牌信源。索引已关闭。\n')
 console.log(`Prerendered home + ${knowledgePages.length} knowledge pages; indexing=${allowIndexing}`)

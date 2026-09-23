@@ -28,6 +28,7 @@ export default function KnowledgePage({ page }: { page: Page }) {
                 <h2>{section.title}</h2>
                 {section.paragraphs.map((text) => <p key={text}>{text}</p>)}
                 {section.bullets ? <ul>{section.bullets.map((text) => <li key={text}>{text}</li>)}</ul> : null}
+                {section.sources?.map((source) => <p key={source.url}><a className="text-link" href={source.url} target="_blank" rel="noreferrer">{source.label} ↗</a></p>)}
               </section>
             ))}
             <section className="knowledge-section" aria-label="常见问题">
