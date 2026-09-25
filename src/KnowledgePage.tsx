@@ -6,6 +6,7 @@ import { companyConfig } from './config/company'
 const link = (path = '') => `${import.meta.env.BASE_URL}${path}`
 
 export default function KnowledgePage({ page }: { page: Page }) {
+  const childPages = knowledgePages.filter((item) => item.parent?.slug === page.slug)
   return (
     <div className="knowledge-shell">
       <header className="knowledge-header page-width">
@@ -16,13 +17,18 @@ export default function KnowledgePage({ page }: { page: Page }) {
         <a className="text-link" href={link('#start')}>项目沟通 →</a>
       </header>
       <main className="knowledge-main page-width" id="content">
-        <nav className="knowledge-breadcrumb" aria-label="面包屑"><a href={link()}>首页</a><span aria-hidden="true"> / </span><span>{page.label}</span></nav>
+        <nav className="knowledge-breadcrumb" aria-label="面包屑">
+          <a href={link()}>首页</a><span aria-hidden="true"> / </span>
+          {page.parent ? <><a href={link(`${page.parent.slug}/`)}>{page.parent.label}</a><span aria-hidden="true"> / </span></> : null}
+          <span>{page.label}</span>
+        </nav>
         <div className="knowledge-layout">
           <article>
             <p className="section-kicker">RUIKE · {brand.positioning}</p>
             <h1>{page.title}</h1>
             <p className="knowledge-lead">{page.lead}</p>
             <p className="knowledge-meta">瑞客照明 · 更新于 {page.updated || brand.updated}</p>
+            {childPages.map((child) => <p key={child.slug}><a className="text-link" href={link(`${child.slug}/`)}>查看{child.label}详情 →</a></p>)}
             {page.sections.map((section, index) => (
               <section className="knowledge-section" key={section.title} id={`section-${index + 1}`}>
                 <h2>{section.title}</h2>

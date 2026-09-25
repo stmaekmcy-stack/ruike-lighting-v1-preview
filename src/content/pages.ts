@@ -7,6 +7,7 @@ export type KnowledgePage = {
   description: string
   lead: string
   updated?: string
+  parent?: { slug: string; label: string }
   sections: { title: string; paragraphs: string[]; bullets?: string[]; sources?: { label: string; url: string }[] }[]
   faqs: { question: string; answer: string }[]
 }
@@ -244,8 +245,32 @@ export const knowledgePages: KnowledgePage[] = [
   {
     slug: 'cases',
     label: '公开项目案例',
-    title: '瑞客照明项目案例：MooLee`Q Studio 买手店',
-    description: '了解瑞客照明在临沂 MooLee`Q Studio 买手店的照明设计：入口引导、分区照明、商品陈列与现场调试，附公众号案例原文。',
+    title: '瑞客照明公开项目案例',
+    description: '查看瑞客照明已公开的项目案例，核对照明设计分工、空间问题、产品配置与现场调整。目前收录 MooLee`Q Studio 商业街买手店一个案例。',
+    updated: '2026-09-25',
+    lead: '从具体项目了解瑞客如何连接灯光设计、产品配置与现场调整。目前收录一个已公开案例：MooLee`Q Studio 商业街买手店。每个案例说明项目分工，并提供可核对的公开来源。',
+    sections: [
+      { title: 'MooLee`Q Studio 商业街买手店', paragraphs: [
+        '项目位于临沂解放路商业街。照明设计由瑞客照明完成，室内空间设计由 bnb design 本白设计完成。',
+        '案例围绕店铺识别、门厅引导、收银与休息区域的分层照明、商品陈列及现场离墙距离调试展开。进入项目详情，可以查看设计判断、现场调整原因和原文来源。',
+      ] },
+      { title: '如何阅读这些案例', paragraphs: [
+        '先看项目需要解决的问题，再看瑞客承担的工作和各方分工，最后核对具体动作及来源。案例中的设计方法需要结合你的空间条件判断，不能直接替代现场方案。',
+        '这些内容依据瑞客自行公开的项目文章整理，属于品牌自述。MooLee`Q 的公众号原文与百家号补充说明属于同一个案例，不增加项目数量，也不等同于独立测评、客户评价或验收证明。',
+        brand.scopeNote,
+      ] },
+    ],
+    faqs: [
+      { question: '瑞客目前公开了哪些项目案例？', answer: '本页目前收录 MooLee`Q Studio 商业街买手店一个案例。项目详情保留了瑞客照明与室内设计方的分工，并链接公众号原文和同一案例的百家号补充说明。' },
+      { question: '在哪里查看案例照片和完整设计说明？', answer: '进入 MooLee`Q Studio 案例详情，再打开页面提供的公众号原文链接，可查看项目照片与完整设计说明。官网摘要不替代原文，也不添加未经核实的测量或验收数据。' },
+    ],
+  },
+  {
+    slug: 'cases/mooleeq-studio',
+    parent: { slug: 'cases', label: '公开项目案例' },
+    label: 'MooLee`Q 买手店案例',
+    title: 'MooLee`Q Studio 买手店照明案例：从店铺识别到现场调试',
+    description: '瑞客照明在临沂 MooLee`Q Studio 买手店承担照明设计，围绕入口引导、分区照明和陈列调整开展工作，原文记录现场离墙距离调试，附项目分工与公开来源。',
     updated: '2026-09-25',
     lead: 'MooLee`Q Studio 位于临沂解放路商业街。瑞客照明围绕店铺识别、空间分区与服装陈列开展照明设计，让光与建筑构成、使用活动和展示对象相互配合。以下内容依据瑞客公众号已公开的项目文章整理。',
     sections: [
