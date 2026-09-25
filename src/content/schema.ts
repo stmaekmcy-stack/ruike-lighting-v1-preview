@@ -47,7 +47,8 @@ export function schemaFor(page?: KnowledgePage) {
       '@type': 'BreadcrumbList', '@id': `${url}#breadcrumb`,
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: '首页', item: SITE_URL },
-        { '@type': 'ListItem', position: 2, name: page.label, item: url },
+        ...(page.parent ? [{ '@type': 'ListItem', position: 2, name: page.parent.label, item: `${SITE_URL}${page.parent.slug}/` }] : []),
+        { '@type': 'ListItem', position: page.parent ? 3 : 2, name: page.label, item: url },
       ],
     },
   )

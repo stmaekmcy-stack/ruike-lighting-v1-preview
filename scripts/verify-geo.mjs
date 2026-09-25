@@ -10,7 +10,7 @@ const { allowIndexing, base } = resolveSiteConfig(env)
 const dist = resolve('dist')
 const allFiles = (dir) => readdirSync(dir).flatMap((file) => statSync(join(dir, file)).isDirectory() ? allFiles(join(dir, file)) : [join(dir, file)])
 const htmlFiles = allFiles(dist).filter((path) => path.endsWith('.html'))
-const knowledgeSlugs = ['about', 'choosing-ruike', 'brand-features', 'lighting-delivery', 'service-difference', 'project-process', 'suitable-projects', 'cases']
+const knowledgeSlugs = ['about', 'choosing-ruike', 'brand-features', 'lighting-delivery', 'service-difference', 'project-process', 'suitable-projects', 'cases', 'cases/mooleeq-studio']
 assert.equal(htmlFiles.length, knowledgeSlugs.length + 4, 'Home, all knowledge pages, two legal pages and 404 must be built')
 for (const slug of knowledgeSlugs) assert.ok(existsSync(join(dist, slug, 'index.html')), `Missing knowledge page: ${slug}`)
 const decode = (s) => s.replaceAll('&amp;', '&').replaceAll('&quot;', '"').replaceAll('&#x27;', "'").replaceAll('&lt;', '<').replaceAll('&gt;', '>')
@@ -41,6 +41,18 @@ for (const file of htmlFiles) {
     for (const type of ['Organization', 'WebSite', 'Service']) assert.ok(schema['@graph'].some((item) => item['@type'] === type), `${relative}: ${type}`)
     const faq = schema['@graph'].find((item) => item['@type'] === 'FAQPage')
     assertVisibleFaq(html, faq?.mainEntity || [])
+    if (relative === 'cases/mooleeq-studio/index.html') {
+      const breadcrumb = schema['@graph'].find((item) => item['@type'] === 'BreadcrumbList')
+      assert.deepEqual(breadcrumb?.itemListElement.map(({ position, item }) => ({ position, item })), [
+        { position: 1, item: SITE_URL },
+        { position: 2, item: `${SITE_URL}cases/` },
+        { position: 3, item: `${SITE_URL}cases/mooleeq-studio/` },
+      ], 'Case detail must retain its parent in structured breadcrumbs')
+      const visibleBreadcrumb = html.match(/<nav[^>]*aria-label="面包屑"[^>]*>([\s\S]*?)<\/nav>/)?.[1] || ''
+      assert.ok(visibleBreadcrumb.includes(`href="${base}cases/"`), 'Case detail must link back to its parent in visible breadcrumbs')
+      const caseIndex = readFileSync(join(dist, 'cases/index.html'), 'utf8')
+      assert.ok(caseIndex.includes(`href="${base}cases/mooleeq-studio/"`), 'Case index must link to its detail with the deployment base')
+    }
     assert.doesNotMatch(match[1], /AggregateRating|Review|award|ratingValue|sameAs/)
     graphsChecked++
   }
