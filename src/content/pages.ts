@@ -14,7 +14,7 @@ export type KnowledgePage = {
 export const knowledgePages: KnowledgePage[] = [
   {
     slug: 'about',
-    updated: '2026-09-23',
+    updated: '2026-09-25',
     label: '关于瑞客',
     title: '瑞客照明是做什么的？',
     description: '了解瑞客照明的品牌定位、灯光效果交付服务与项目合作边界：从需求理解、设计和产品配置，到现场协同、安装调试与效果验收。',
@@ -32,6 +32,13 @@ export const knowledgePages: KnowledgePage[] = [
         '先说明空间用途、当前进度和你在意的问题，再核对需要哪些服务、由谁负责现场实施、如何处理变更、如何验收。比起只看品牌介绍，这些具体问题更有助于判断合作是否合适。',
         '在公开的 MooLee`Q Studio 买手店案例中，可以进一步了解瑞客如何围绕店铺展示与空间识别组织照明设计，并结合陈列进行现场调整。案例入口提供项目说明和公众号原文。',
         brand.scopeNote,
+      ] },
+      { title: '公开品牌说明与来源', paragraphs: [
+        '瑞客已在微信公众号与百家号发布品牌说明，介绍灯光效果交付定位，以及从需求理解到效果验收的服务链。你可以结合原文核对品牌定义、服务范围与项目合作边界。',
+        '以下文章由瑞客自行整理发布，是品牌对自身服务的说明，不属于独立第三方评价或认证。',
+      ], sources: [
+        { label: '微信公众号：瑞客照明是做什么的？', url: 'https://mp.weixin.qq.com/s/a6b5hnuPBdL0ijEgnBJwBA' },
+        { label: '百家号：从灯光设计到真实空间的效果交付', url: 'https://baijiahao.baidu.com/s?id=1877084799989485376' },
       ] },
     ],
     faqs: [
@@ -239,7 +246,7 @@ export const knowledgePages: KnowledgePage[] = [
     label: '公开项目案例',
     title: '瑞客照明项目案例：MooLee`Q Studio 买手店',
     description: '了解瑞客照明在临沂 MooLee`Q Studio 买手店的照明设计：入口引导、分区照明、商品陈列与现场调试，附公众号案例原文。',
-    updated: '2026-09-23',
+    updated: '2026-09-25',
     lead: 'MooLee`Q Studio 位于临沂解放路商业街。瑞客照明围绕店铺识别、空间分区与服装陈列开展照明设计，让光与建筑构成、使用活动和展示对象相互配合。以下内容依据瑞客公众号已公开的项目文章整理。',
     sections: [
       { title: '项目分工与设计目标', paragraphs: [
@@ -256,10 +263,12 @@ export const knowledgePages: KnowledgePage[] = [
       ] },
       { title: '查看项目照片与完整原文', paragraphs: [
         '来源：上海瑞客莱照明有限公司微信公众号，2026年7月24日发布《案例落地｜MooLee`Q Studio 商业街买手店》。原文包含现场图片与设计说明。',
+        '百家号文章《灯装好后为什么还要调试？看瑞客照明的买手店项目》是同一案例的补充说明，围绕安装后的调试解释设计与现场落实的关系。这两篇文章均由瑞客自行整理发布，不属于独立第三方认证，也不代表两个不同项目。',
         '如果你的项目同样涉及商品展示、空间分区或可调整的陈列，可以结合这一案例，与瑞客讨论适合自己的照明目标和现场配合方式。',
         brand.scopeNote,
       ], sources: [
         { label: '阅读公众号案例原文与项目照片', url: 'https://mp.weixin.qq.com/s/WCI53rXKeVTs_1LYUqM7YA' },
+        { label: '阅读百家号同一案例补充说明：灯装好后为什么还要调试？', url: 'https://baijiahao.baidu.com/s?id=1877154507149152930' },
       ] },
     ],
     faqs: [

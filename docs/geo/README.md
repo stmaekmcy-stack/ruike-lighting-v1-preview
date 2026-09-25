@@ -1,17 +1,19 @@
 # 国内 AI GEO 第一阶段
 
-本轮基于 main 的 d35f712，沿用现有首页视觉。六个知识页为静态 HTML：首页与知识页无需爬虫执行 JavaScript 即可获得正文。
+截至 2026-09-25，八个知识页均为静态 HTML，沿用现有首页视觉：首页与知识页无需爬虫执行 JavaScript 即可获得正文。本次公开来源补充基于 main 的 447b10e；本说明不代表新增修改已经部署上线。
 
 ## 可维护内容
 
 - src/content/brand.ts：公开品牌事实母版。
-- src/content/pages.ts：六页正文、页面标题、摘要和可见 FAQ。
+- src/content/pages.ts：八页正文、页面标题、摘要、可见 FAQ 与公开来源链接。
 - src/content/schema.ts：Organization、WebSite、Service、WebPage、FAQPage、BreadcrumbList；不添加奖项、评分或推测的关联账号。
 - src/config/site.ts：唯一正式 SITE_URL。构建拒绝预览 URL、不同主机、路径或协议进入 canonical。
 - scripts/prerender.mjs：预渲染、sitemap、robots、llms.txt。
 - scripts/verify-geo.mjs：原始 HTML、结构化数据、FAQ 与正文一致性、内部页面/锚点/资源、索引开关检查。
 
-新增 /about/、/lighting-delivery/、/service-difference/、/project-process/、/suitable-projects/、/cases/。
+当前知识页：/about/、/choosing-ruike/、/brand-features/、/lighting-delivery/、/service-difference/、/project-process/、/suitable-projects/、/cases/。
+
+关于瑞客页提供微信公众号与百家号的品牌说明；案例页保留 MooLee`Q Studio 公众号原文，并链接同一案例的百家号补充说明。来源通过可见链接与 WebPage 的 citation 输出，llms.txt 同步列出品牌和项目来源；不将文章链接写入 Organization.sameAs。这些内容由品牌自行整理发布，不属于独立第三方评价或认证。
 
 ## 构建与索引
 
@@ -23,7 +25,7 @@
 
 ## 内部证据隔离
 
-素材索引、原始合同、联系方式缺口、平台账号信息和客户授权留在内部交付目录，不复制进 public/ 或这个公开代码库。只有经核验且授权的案例内容进入 pages.ts 或未来的专用案例模块。当前案例页明确没有可公开的案例详情。
+素材索引、原始合同、联系方式缺口、平台账号信息和客户授权留在内部交付目录，不复制进 public/ 或这个公开代码库。只有经核验且授权的案例内容进入 pages.ts 或未来的专用案例模块。当前案例页有 1 个公开案例：MooLee`Q Studio 商业街买手店；同一项目的跨平台补充文章不增加案例数。尚未核实项目分工与公开授权的候选素材不纳入公开案例。
 
 ## 技术参考
 
