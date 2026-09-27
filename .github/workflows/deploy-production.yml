@@ -76,6 +76,12 @@ jobs:
           npm ci
           npm run check
           npm prune --omit=dev
+      - name: Add production IndexNow ownership file
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          [[ "$INDEXNOW_KEY" =~ ^[a-f0-9]{32}$ ]] || { echo 'Configure a 32-character hexadecimal INDEXNOW_KEY in the production environment.'; exit 1; }
+          printf '%s\n' "$INDEXNOW_KEY" > "dist/${INDEXNOW_KEY}.txt"
       - name: Package immutable release
         env:
           RELEASE_SHA: ${{ steps.release.outputs.sha }}
@@ -127,6 +133,12 @@ jobs:
             const health = JSON.parse(text);
             if (health.status !== "ok" || health.release !== process.env.RUIKE_RELEASE_ID) process.exit(1);
           '
+      - name: Verify public IndexNow ownership file
+        env:
+          INDEXNOW_KEY: ${{ secrets.INDEXNOW_KEY }}
+        run: |
+          key_body="$(curl --fail --show-error --silent --max-time 20 "${VITE_SITE_URL%/}/${INDEXNOW_KEY}.txt")"
+          test "$key_body" = "$INDEXNOW_KEY"
       - name: Roll back when external verification fails
         if: failure() && steps.activate.outcome == 'success'
         run: |

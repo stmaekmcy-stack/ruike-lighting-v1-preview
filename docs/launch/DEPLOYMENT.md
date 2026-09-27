@@ -60,8 +60,19 @@ GitHub Actions 测试、构建、打包、校验和
 | `PRODUCTION_SSH_USER` | 仅能调用发布/回滚脚本的独立发布用户 |
 | `PRODUCTION_SSH_PRIVATE_KEY` | 独立部署密钥，不与个人日常密钥共用 |
 | `PRODUCTION_SSH_KNOWN_HOSTS` | 经可信通道核对的服务器主机公钥 |
+| `INDEXNOW_KEY` | 32 位小写十六进制随机值；只放在 production Secret，不提交到公开仓库 |
 
 SMTP 密码和真实收件人不进入 GitHub 构建变量，只保存在服务器 `/etc/ruike-lighting/lead-service.env`，权限必须为 `0600`。
+
+### IndexNow 站点所有权文件
+
+生产发布在网页构建通过后，将 `INDEXNOW_KEY` 写入 `dist/<key>.txt`。文件随不可变发布包上线，后续正常发布会自动保留这项能力；预览构建不读取该 Secret，也不生成此文件。验证文件不放入页面、Schema、sitemap 或 llms.txt。首次接入或变更密钥前，应保存旧值以便回退。
+
+外部验收必须确认 HTTPS 验证文件可直接读取且内容与密钥一致；失败沿用现有生产回滚。回滚到接入前的历史版本时，验证文件可能不存在，须暂停提交，待恢复文件后继续。此机制不改变网页视觉或正文。
+
+URL 提交通道为 `https://api.indexnow.org/indexnow`，按 [IndexNow 官方文档](https://www.indexnow.org/documentation) 发送包含 `host`、`key`、`keyLocation` 与 `urlList` 的 JSON。只提交本主站真实公开内容 URL；不提交预览域名、内部资料、验证文件，不把 sitemap 每天全量重复提交。后续新增、修改或删除页面时，提交对应变化的 URL。
+
+提交前核对生产索引已开启、canonical 使用主域名、验证文件有效。留存提交时间、URL 列表、HTTP 状态和回执，不记录密钥。HTTP 200 仅表示接口收到 URL；202 表示收到 URL、密钥验证待完成，均不等于抓取、收录、排名或 AI 引用。IndexNow 不代替 Google Search Console 或百度搜索资源平台的站点验证和提交。
 
 ## 服务器首次引导
 
