@@ -10,6 +10,7 @@
 - `/cases/` 和 `/cases/mooleeq-studio/` 已公开同一 MooLee`Q Studio 项目的摘要与详细说明，保留瑞客公众号和百家号原文及项目分工；公开案例仍为 1 个。
 - IndexNow 根目录验证文件已接入生产部署，并通过公网内容核对。2026-09-27 首次发送 10 个 URL，HTTP 202 仅表示已接收、搜索引擎端密钥验证待完成。
 - Google Search Console 与百度搜索资源平台尚未完成站点验证和提交；没有将网页上线、robots 放行或 IndexNow 回执记作已收录。
+- Google 文件验证令牌已从用户提供的 Search Console 截图及当前验证窗口核对。生产工作流从 `ops/verification/` 加入对应文件，并在发布后检查公网内容；失败沿用原回滚流程。此文件不进入预览构建、sitemap 或页面导航，后续部署必须保留。文件内容按 [Google 官方文件验证格式](https://developers.google.com/site-verification/v1/getting_started#site_verification_methods) 生成；文件可访问与控制台验证成功分别记录，不能互相替代。
 
 ## 可查看环境
 
@@ -84,4 +85,4 @@
 
 ## 恢复执行的下一动作
 
-正式主域名上线、开放抓取、预览隔离和 `.cn` 保护跳转均已完成。当前优先取得 Google 账号实际生成的验证标记，完成 Google/百度站点验证、提交及收录诊断；同时按授权继续完善公开品牌事实和可核对案例。真实咨询信息/接收端、真机与微信内验证保留为原有待办，现有视觉保持不变。不要重复初始化、申请证书、添加 DNS 或执行初次准备脚本。首发历史证据见 [VERIFICATION.md](VERIFICATION.md)，后续修改和运行见 GitHub PR 与 Actions 记录。
+正式主域名上线、开放抓取、预览隔离和 `.cn` 保护跳转均已完成。Google 账号实际生成的文件验证令牌已取得；当前优先完成文件部署后的控制台验证、sitemap 提交和收录诊断，再推进百度站点验证与提交；同时按授权继续完善公开品牌事实和可核对案例。真实咨询信息/接收端、真机与微信内验证保留为原有待办，现有视觉保持不变。不要重复初始化、申请证书、添加 DNS 或执行初次准备脚本。首发历史证据见 [VERIFICATION.md](VERIFICATION.md)，后续修改和运行见 GitHub PR 与 Actions 记录。
