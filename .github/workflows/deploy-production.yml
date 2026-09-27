@@ -84,6 +84,18 @@ jobs:
           printf '%s\n' "$INDEXNOW_KEY" > "dist/${INDEXNOW_KEY}.txt"
       - name: Add production Google ownership file
         run: cp ops/verification/google63f970b265131a92.html dist/google63f970b265131a92.html
+      - name: Add production Baidu ownership tag
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync, writeFileSync } from 'node:fs';
+          const file = 'dist/index.html';
+          const html = readFileSync(file, 'utf8');
+          const tag = readFileSync('ops/verification/baidu-site-verification.html', 'utf8').trim();
+          if (html.split('</head>').length !== 2 || html.includes('baidu-site-verification')) {
+            throw new Error('Expected one homepage head and no existing Baidu verification tag.');
+          }
+          writeFileSync(file, html.replace('</head>', tag + '\n</head>'));
+          NODE
       - name: Package immutable release
         env:
           RELEASE_SHA: ${{ steps.release.outputs.sha }}
@@ -145,6 +157,18 @@ jobs:
         run: |
           curl --fail --show-error --silent --max-time 20 "${VITE_SITE_URL%/}/google63f970b265131a92.html" -o /tmp/ruike-google-verification.html
           cmp ops/verification/google63f970b265131a92.html /tmp/ruike-google-verification.html
+      - name: Verify public Baidu ownership tag
+        run: |
+          curl --fail --show-error --silent --max-time 20 "$VITE_SITE_URL" -o /tmp/ruike-baidu-homepage.html
+          node --input-type=module <<'NODE'
+          import { readFileSync } from 'node:fs';
+          const html = readFileSync('/tmp/ruike-baidu-homepage.html', 'utf8');
+          const tag = readFileSync('ops/verification/baidu-site-verification.html', 'utf8').trim();
+          const head = html.match(/<head\b[^>]*>([\s\S]*?)<\/head>/i)?.[1];
+          if (!head?.includes(tag) || html.split('name="baidu-site-verification"').length !== 2) {
+            throw new Error('Public homepage must contain exactly one approved Baidu tag in head.');
+          }
+          NODE
       - name: Roll back when external verification fails
         if: failure() && steps.activate.outcome == 'success'
         run: |
