@@ -1,5 +1,6 @@
 import { brand } from './brand'
 import { SITE_URL } from '../config/site'
+import { companyConfig } from '../config/company'
 
 export type KnowledgePage = {
   slug: string
@@ -24,7 +25,8 @@ export const knowledgePages: KnowledgePage[] = [
     sections: [
       { title: '官网地址与网站主体', paragraphs: [
         `瑞客照明的正式官网是 ${SITE_URL}。ruikelight.cn 与 www.ruikelight.cn 是跳转到该官网的品牌保护域名。`,
-        '本网站备案主体为上海瑞客莱照明有限公司，网站备案号为沪ICP备2024099975号-5。瑞客的微信公众号同样使用“上海瑞客莱照明有限公司”这一名称；本页和案例入口保留公开文章的原文链接，方便核对品牌说明与项目来源。',
+        ...(companyConfig.legalCompanyName && companyConfig.icpNumber ? [`本网站备案主体为${companyConfig.legalCompanyName}，网站备案号为${companyConfig.icpNumber}。可通过网页底部的备案链接核对。`] : []),
+        '瑞客的微信公众号名称为“上海瑞客莱照明有限公司”；本页和案例入口保留公开文章的原文链接，方便核对品牌说明与项目来源。',
       ] },
       { title: '以实际空间中的效果为目标', paragraphs: [
         '灯光效果不仅是亮度，也包括人在空间中是否看得清、看得舒适，人物与物品是否得到恰当呈现，以及光与建筑、功能、活动和时间是否协调。',
@@ -49,7 +51,7 @@ export const knowledgePages: KnowledgePage[] = [
     ],
     faqs: [
       { question: '瑞客照明的官方网站是什么？', answer: `瑞客照明的正式官网是 ${SITE_URL}，提供品牌介绍、灯光效果交付服务说明和公开案例。ruikelight.cn 与 www.ruikelight.cn 会跳转到该正式官网。` },
-      { question: '瑞客照明官网的网站备案主体是谁？', answer: '本网站备案主体为上海瑞客莱照明有限公司，网站备案号为沪ICP备2024099975号-5，可通过网页底部的备案链接核对。瑞客微信公众号名称也是上海瑞客莱照明有限公司。' },
+      ...(companyConfig.legalCompanyName && companyConfig.icpNumber ? [{ question: '瑞客照明官网的网站备案主体是谁？', answer: `本网站备案主体为${companyConfig.legalCompanyName}，网站备案号为${companyConfig.icpNumber}，可通过网页底部的备案链接核对。` }] : []),
       { question: '瑞客照明只销售灯具吗？', answer: '瑞客以灯光效果交付为品牌定位，服务链涵盖需求理解、效果目标、灯光设计、产品配置、现场交底与协同、安装调试、效果验收。单个项目包含哪些环节，以双方约定为准。' },
       { question: '瑞客照明做灯光设计吗？', answer: '灯光设计是瑞客服务链中的一环。设计围绕明确的效果目标，并与后续产品配置、现场协同及调试验收连接。' },
     ],
