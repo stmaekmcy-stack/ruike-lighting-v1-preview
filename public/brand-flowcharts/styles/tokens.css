@@ -1,0 +1,32 @@
+:root {
+  --paper: #f3f1ec;
+  --white: #fcfbf8;
+  --ink: #262623;
+  --muted: #6a6963;
+  --hairline: #d5d1c7;
+  --dark: #252623;
+  --dark-muted: #c2c0b8;
+  --dark-line: #575951;
+  --accent: #9a8461;
+  --light: #e3d3b5;
+  --light-soft: #f4ecd8;
+  --font-sans: "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  --font-number: "Helvetica Neue", Arial, sans-serif;
+  --space-unit: 8px;
+  --radius: 2px;
+  --stroke: 1.5;
+  --node-dot: 5;
+  --a-width: 1080;
+  --a-height: 1350;
+  --b-width: 1920;
+  --b-height: 1080;
+  --a-margin: 72;
+  --b-margin: 96;
+  --title-a: 60;
+  --title-b: 72;
+  --body-a: 28;
+  --body-b: 28;
+  --node-title-a: 36;
+  --node-title-b: 36;
+  --tracking: 1;
+}

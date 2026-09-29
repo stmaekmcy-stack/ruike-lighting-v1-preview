@@ -1,0 +1,111 @@
+{
+  "brand": {
+    "name": "瑞客照明",
+    "position": "灯光效果交付品牌",
+    "value": "效果保障，让好灯光看得见",
+    "slogan": "不止卖灯，效果交付",
+    "mission": "为客户实现期待的灯光效果，让每一个空间因光而更具价值。"
+  },
+  "assets": [
+    {
+      "id": "01",
+      "title": "瑞客灯光效果交付流程",
+      "variant": "a",
+      "width": 1080,
+      "height": 1350,
+      "svg": "01-effect-delivery-a.svg",
+      "png": "01-effect-delivery-a.png",
+      "textEditable": true
+    },
+    {
+      "id": "01",
+      "title": "瑞客灯光效果交付流程",
+      "variant": "b",
+      "width": 1920,
+      "height": 1080,
+      "svg": "01-effect-delivery-b.svg",
+      "png": "01-effect-delivery-b.png",
+      "textEditable": true
+    },
+    {
+      "id": "02",
+      "title": "从一句期待，到真实灯光效果",
+      "variant": "a",
+      "width": 1080,
+      "height": 1350,
+      "svg": "02-expectation-to-result-a.svg",
+      "png": "02-expectation-to-result-a.png",
+      "textEditable": true
+    },
+    {
+      "id": "02",
+      "title": "从一句期待，到真实灯光效果",
+      "variant": "b",
+      "width": 1920,
+      "height": 1080,
+      "svg": "02-expectation-to-result-b.svg",
+      "png": "02-expectation-to-result-b.png",
+      "textEditable": true
+    },
+    {
+      "id": "03",
+      "title": "效果保障，不是一句承诺",
+      "variant": "a",
+      "width": 1080,
+      "height": 1350,
+      "svg": "03-effect-assurance-a.svg",
+      "png": "03-effect-assurance-a.png",
+      "textEditable": true
+    },
+    {
+      "id": "03",
+      "title": "效果保障，不是一句承诺",
+      "variant": "b",
+      "width": 1920,
+      "height": 1080,
+      "svg": "03-effect-assurance-b.svg",
+      "png": "03-effect-assurance-b.png",
+      "textEditable": true
+    },
+    {
+      "id": "04",
+      "title": "一次完整的灯光项目合作",
+      "variant": "a",
+      "width": 1080,
+      "height": 1350,
+      "svg": "04-customer-journey-a.svg",
+      "png": "04-customer-journey-a.png",
+      "textEditable": true
+    },
+    {
+      "id": "04",
+      "title": "一次完整的灯光项目合作",
+      "variant": "b",
+      "width": 1920,
+      "height": 1080,
+      "svg": "04-customer-journey-b.svg",
+      "png": "04-customer-journey-b.png",
+      "textEditable": true
+    },
+    {
+      "id": "05",
+      "title": "买到灯 ≠ 得到灯光效果",
+      "variant": "a",
+      "width": 1080,
+      "height": 1350,
+      "svg": "05-traditional-vs-ruike-a.svg",
+      "png": "05-traditional-vs-ruike-a.png",
+      "textEditable": true
+    },
+    {
+      "id": "05",
+      "title": "买到灯 ≠ 得到灯光效果",
+      "variant": "b",
+      "width": 1920,
+      "height": 1080,
+      "svg": "05-traditional-vs-ruike-b.svg",
+      "png": "05-traditional-vs-ruike-b.png",
+      "textEditable": true
+    }
+  ]
+}

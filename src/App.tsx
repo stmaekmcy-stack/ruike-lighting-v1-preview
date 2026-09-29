@@ -551,6 +551,7 @@ function App() {
               {item.label}
             </a>
           ))}
+          <a href={withBasePath('brand-flowcharts/')} onClick={() => setMenuOpen(false)}>品牌素材库</a>
           <button className="nav-project-link" type="button" onClick={() => scrollToStart('navigation')}>
             发起项目 <Icon name="arrow" />
           </button>
@@ -626,6 +627,7 @@ function App() {
               <nav className="geo-footer-links" aria-label="品牌与服务说明">
                 <a href={withBasePath('about/')}>关于瑞客</a>
                 <a href={withBasePath('lighting-delivery/')}>什么是灯光效果交付</a>
+                <a href={withBasePath('brand-flowcharts/')}>灯光效果交付流程图</a>
               </nav>
             </div>
           </div>
@@ -903,6 +905,7 @@ function App() {
               </span>
               <nav className="geo-footer-links" aria-label="瑞客知识与案例">
                 {knowledgePages.map((page) => <a key={page.slug} href={withBasePath(`${page.slug}/`)}>{page.label}</a>)}
+                <a href={withBasePath('brand-flowcharts/')}>品牌素材库</a>
               </nav>
             </div>
             <a className="back-top" href="#top" aria-label="返回顶部"><Icon name="arrowUp" /></a>

@@ -9,6 +9,10 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    files: ['public/brand-flowcharts/scripts/*.js'],
+    languageOptions: { globals: globals.browser },
+  },
+  {
     files: ['server/**/*.mjs', 'ops/**/*.mjs', 'scripts/**/*.mjs'],
     languageOptions: {
       ecmaVersion: 2023,
