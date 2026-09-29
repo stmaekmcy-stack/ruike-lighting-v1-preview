@@ -4,6 +4,7 @@ import { resolve, join } from 'node:path'
 import { loadEnv } from 'vite'
 import { SITE_URL, resolveSiteConfig } from '../src/config/site.ts'
 import { assertVisibleFaq } from './visible-faq.mjs'
+import { brandFlowchartPages } from './brand-flowcharts.mjs'
 
 const env = { ...loadEnv('production', process.cwd(), ''), ...process.env }
 const { allowIndexing, base } = resolveSiteConfig(env)
@@ -11,7 +12,7 @@ const dist = resolve('dist')
 const allFiles = (dir) => readdirSync(dir).flatMap((file) => statSync(join(dir, file)).isDirectory() ? allFiles(join(dir, file)) : [join(dir, file)])
 const htmlFiles = allFiles(dist).filter((path) => path.endsWith('.html'))
 const knowledgeSlugs = ['about', 'choosing-ruike', 'brand-features', 'lighting-delivery', 'service-difference', 'project-process', 'suitable-projects', 'cases', 'cases/mooleeq-studio']
-assert.equal(htmlFiles.length, knowledgeSlugs.length + 4, 'Home, all knowledge pages, two legal pages and 404 must be built')
+assert.equal(htmlFiles.length, knowledgeSlugs.length + brandFlowchartPages.length + 4, 'Home, knowledge pages, library pages, two legal pages and 404 must be built')
 for (const slug of knowledgeSlugs) assert.ok(existsSync(join(dist, slug, 'index.html')), `Missing knowledge page: ${slug}`)
 const decode = (s) => s.replaceAll('&amp;', '&').replaceAll('&quot;', '"').replaceAll('&#x27;', "'").replaceAll('&lt;', '<').replaceAll('&gt;', '>')
 const titles = new Set()
@@ -75,9 +76,10 @@ for (const file of htmlFiles) {
 assert.equal(graphsChecked, knowledgeSlugs.length + 1)
 const sitemap = readFileSync(join(dist, 'sitemap.xml'), 'utf8')
 const locations = [...sitemap.matchAll(/<loc>(.*?)<\/loc>/g)].map((item) => item[1])
-assert.equal(locations.length, allowIndexing ? knowledgeSlugs.length + 3 : 0)
+assert.equal(locations.length, allowIndexing ? knowledgeSlugs.length + brandFlowchartPages.length + 3 : 0)
 assert.equal(new Set(locations).size, locations.length, 'Sitemap URLs must be unique')
 for (const slug of knowledgeSlugs) assert.equal(locations.includes(`${SITE_URL}${slug}/`), allowIndexing, `Sitemap: ${slug}`)
+for (const { route } of brandFlowchartPages) assert.equal(locations.includes(`${SITE_URL}${route}`), allowIndexing, `Sitemap: ${route}`)
 for (const url of locations) {
   assert.ok(url.startsWith(SITE_URL))
   assert.ok(existsSync(join(dist, url.slice(SITE_URL.length) || 'index.html')))
@@ -88,5 +90,6 @@ assert.equal(robots.includes(`Sitemap: ${SITE_URL}sitemap.xml`), allowIndexing)
 const llms = readFileSync(join(dist, 'llms.txt'), 'utf8')
 assert.doesNotMatch(sitemap + robots + llms, /github\.io|localhost|example\.com/)
 for (const slug of knowledgeSlugs) assert.equal(llms.includes(`${SITE_URL}${slug}/`), allowIndexing, `llms.txt: ${slug}`)
+for (const { route } of brandFlowchartPages) assert.equal(llms.includes(`${SITE_URL}${route}`), allowIndexing, `llms.txt: ${route}`)
 assert.equal(existsSync(join(dist, 'docs')), false, 'Internal documentation must not be deployed')
 console.log(JSON.stringify({ status: 'passed', htmlPages: htmlFiles.length, schemaGraphs: graphsChecked, internalLinksAndAssets: linksChecked, sitemapUrls: locations.length, allowIndexing }))

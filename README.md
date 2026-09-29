@@ -14,14 +14,15 @@
 - [项目七个环节](https://ruikelight.com/project-process/)
 - [适合的客户与项目](https://ruikelight.com/suitable-projects/)
 - [公开案例入口](https://ruikelight.com/cases/) · [MooLee`Q Studio 买手店照明设计](https://ruikelight.com/cases/mooleeq-studio/)
+- [品牌素材库：五个主题的灯光效果交付流程图与素材下载](https://ruikelight.com/brand-flowcharts/)
 
 网站备案主体为上海瑞客莱照明有限公司，网站备案号为沪ICP备2024099975号-5。品牌介绍和案例为瑞客自述，案例页面保留公开原文与项目分工；具体服务内容及责任以项目约定为准。
 
-## 当前状态（2026-09-27）
+## 当前状态（2026-09-29）
 
 - 正式网站已上线并开放抓取，`ruikelight.cn` 与 `www.ruikelight.cn` 跳转到唯一正式主站。实时发布版本可从 [healthz](https://ruikelight.com/healthz) 核对。
-- 已提供首页、九个知识与案例页面、隐私和条款页面；正式网站地图含 12 个 URL。
-- IndexNow 所有权文件已接入生产发布，首轮 10 个品牌、服务和案例 URL 获 HTTP 202 回执，表示已接收、密钥验证待完成。Google/百度站长验证与提交仍未完成，搜索收录及六个平台的 AI 引用尚未确认改善。
+- 已提供首页、九个知识与案例页面、品牌素材库及五个详情页、隐私和条款页面；正式网站地图含 18 个 URL。
+- IndexNow 所有权文件已接入生产发布，首轮 10 个品牌、服务和案例 URL 获 HTTP 202 回执，表示已接收、密钥验证待完成。Google/百度验证与提交的分阶段记录见上线状态；搜索收录及六个平台的 AI 引用尚未确认改善。
 - GitHub Pages 是开发预览环境，使用 `noindex, nofollow`，不作为正式品牌网址；预览操作说明见下文。
 - 权威进度：[`docs/launch/LAUNCH_STATUS.md`](docs/launch/LAUNCH_STATUS.md)
 
@@ -52,6 +53,14 @@ npm run preview
 - 当前产品图片与详细分类均为 `draft`。开发环境保留资料占位，生产环境只显示产品能力说明。
 - 公司信息集中在 `src/config/company.ts`。空字段不会渲染，ICP备案与公安备案未提供时不显示。
 - 官方微信二维码复用自已核验的 RiRK 产品图册品牌资料，文件哈希与来源文件一致。
+
+## 品牌素材库
+
+素材库位于 `public/brand-flowcharts/`，包含 5 个主题的横竖双版、10 张 PNG、10 张原生文字 SVG，以及整套 ZIP。首页导航、品牌说明与页脚提供入口，详情页支持清晰阅读、下载与本机生成 2× PNG。素材库可返回官网，复制分享链接会使用当前官网地址。
+
+`scripts/brand-flowcharts.mjs` 在构建时写入正式 canonical、各页简介、分享信息和备案号；预览环境保持 `noindex, nofollow`，生产是否开放索引沿用全站设置。网站地图和 `llms.txt` 随正式构建收录六个素材页面。素材图版和 ZIP 不包含客户隐私或内部文档。
+
+后续修改时保持网页图版、独立 SVG、PNG 和 ZIP 文案一致，优先从原交付项目重新生成素材后更新此目录；保留官网返回入口及 `<!-- RUIKE_ICP -->` 构建标记。SVG 保留文字，可用于后续设计精修。素材库使用独立样式，官网视觉与安全响应头沿用原配置。
 
 ## 项目表单闸门
 

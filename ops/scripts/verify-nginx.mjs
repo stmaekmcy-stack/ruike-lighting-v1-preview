@@ -60,7 +60,7 @@ try {
   exit = once(nginx, 'exit')
   const request = (path, { domain = 'ruikelight.com', secure = true, method = 'GET' } = {}) => {
     const port = secure ? httpsPort : httpPort
-    return run('curl', ['--noproxy', '*', '--silent', '--show-error', '--max-time', '5', '--cacert', certificate, '--resolve', `${domain}:${port}:127.0.0.1`, '-X', method, '-i', `${secure ? 'https' : 'http'}://${domain}:${port}${path}`])
+    return run('curl', ['--noproxy', '*', '--silent', '--show-error', '--max-time', '5', '--cacert', certificate, '--resolve', `${domain}:${port}:127.0.0.1`, ...(method === 'HEAD' ? ['--head'] : ['-X', method]), '-i', `${secure ? 'https' : 'http'}://${domain}:${port}${path}`])
   }
   for (let attempt = 0; attempt < 30; attempt++) {
     try { request('/healthz'); break } catch (error) {
@@ -79,6 +79,9 @@ try {
     assert.match(request(path), /HTTP\/(?:1\.1|2) 200/, path)
   }
   const missing = request('/page-does-not-exist')
+  for (const path of ['/brand-flowcharts/', '/brand-flowcharts/pages/01-effect-delivery/', '/brand-flowcharts/pages/02-expectation-to-result/', '/brand-flowcharts/pages/03-effect-assurance/', '/brand-flowcharts/pages/04-customer-journey/', '/brand-flowcharts/pages/05-traditional-vs-ruike/', '/brand-flowcharts/scripts/ui.js', '/brand-flowcharts/styles/global.css', '/brand-flowcharts/export/01-effect-delivery-a.png', '/brand-flowcharts/export/01-effect-delivery-a.svg', '/brand-flowcharts/downloads/ruike-brand-materials.zip']) {
+    assert.match(request(path, { method: 'HEAD' }), /HTTP\/(?:1\.1|2) 200/, path)
+  }
   assert.match(missing, /HTTP\/(?:1\.1|2) 404/)
   assert.match(missing, /返回瑞客首页/)
   assert.match(request('/.env'), /HTTP\/(?:1\.1|2) 403/)

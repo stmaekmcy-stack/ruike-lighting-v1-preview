@@ -55,6 +55,7 @@ export default function KnowledgePage({ page }: { page: Page }) {
         <p>{brand.promise}</p>
         <nav aria-label="网站信息">
           <a href={link()}>返回首页</a>
+          <a href={link('brand-flowcharts/')}>品牌素材库</a>
           <a href={link('privacy.html')}>隐私说明</a>
           <a href={link('terms.html')}>网站使用条款</a>
           {companyConfig.icpNumber ? <a href="https://beian.miit.gov.cn/" rel="noreferrer" target="_blank">{companyConfig.icpNumber}</a> : null}
