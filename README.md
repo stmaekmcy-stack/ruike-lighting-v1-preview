@@ -22,7 +22,7 @@
 
 - 正式网站已上线并开放抓取，`ruikelight.cn` 与 `www.ruikelight.cn` 跳转到唯一正式主站。实时发布版本可从 [healthz](https://ruikelight.com/healthz) 核对。
 - 已提供首页、九个知识与案例页面、品牌素材库及五个详情页、隐私和条款页面；正式网站地图含 18 个 URL。
-- IndexNow 所有权文件已接入生产发布，首轮 10 个品牌、服务和案例 URL 获 HTTP 202 回执，表示已接收、密钥验证待完成。Google/百度验证与提交的分阶段记录见上线状态；搜索收录及六个平台的 AI 引用尚未确认改善。
+- IndexNow 所有权文件已接入生产发布，首轮 10 个品牌、服务和案例 URL 获 HTTP 202 回执，表示已接收、密钥验证待完成。Google/百度验证与提交的分阶段记录见上线状态；2026-09-29 用户截图已显示两者普通搜索中的官网条目，持续排名及六个平台的 AI 引用仍待分别核验。
 - GitHub Pages 是开发预览环境，使用 `noindex, nofollow`，不作为正式品牌网址；预览操作说明见下文。
 - 权威进度：[`docs/launch/LAUNCH_STATUS.md`](docs/launch/LAUNCH_STATUS.md)
 
