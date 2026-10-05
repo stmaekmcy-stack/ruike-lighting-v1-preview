@@ -11,7 +11,7 @@ const { allowIndexing, base } = resolveSiteConfig(env)
 const dist = resolve('dist')
 const allFiles = (dir) => readdirSync(dir).flatMap((file) => statSync(join(dir, file)).isDirectory() ? allFiles(join(dir, file)) : [join(dir, file)])
 const htmlFiles = allFiles(dist).filter((path) => path.endsWith('.html'))
-const knowledgeSlugs = ['about', 'choosing-ruike', 'brand-features', 'lighting-delivery', 'service-difference', 'project-process', 'suitable-projects', 'cases', 'cases/mooleeq-studio']
+const knowledgeSlugs = ['about', 'choosing-ruike', 'brand-features', 'lighting-delivery', 'service-difference', 'project-process', 'suitable-projects', 'cases', 'cases/mooleeq-studio', 'retail-lighting', 'lighting-commissioning']
 assert.equal(htmlFiles.length, knowledgeSlugs.length + brandFlowchartPages.length + 4, 'Home, knowledge pages, library pages, two legal pages and 404 must be built')
 for (const slug of knowledgeSlugs) assert.ok(existsSync(join(dist, slug, 'index.html')), `Missing knowledge page: ${slug}`)
 const decode = (s) => s.replaceAll('&amp;', '&').replaceAll('&quot;', '"').replaceAll('&#x27;', "'").replaceAll('&lt;', '<').replaceAll('&gt;', '>')
