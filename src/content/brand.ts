@@ -8,4 +8,6 @@ export const brand = {
   scopeNote: '具体服务内容、现场分工、验收条件与交付范围，以双方确认的项目文件和合同为准。',
   updated: '2026-09-20',
   chain: ['需求理解', '效果目标', '灯光设计', '产品配置', '现场交底与协同', '安装调试', '效果验收'],
+  // Display names match the approved homepage; chain above describes the service scope.
+  deliveryStepNames: ['理解期待', '定义效果', '灯光设计', '产品匹配', '现场落地', '专业调试', '效果验收'],
 }

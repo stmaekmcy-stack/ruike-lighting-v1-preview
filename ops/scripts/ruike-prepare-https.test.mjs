@@ -103,10 +103,15 @@ function fixture(mode = 'success') {
     try {
       const stdout = execFileSync('bash', [path('prepare.sh')], {
         env: { ...process.env, RUIKE_TLS_TEST_ROOT: root, RUIKE_TLS_TEST_MODE: mode },
-        encoding: 'utf8', timeout: 20000, stdio: ['ignore', 'pipe', 'pipe'],
+        // Each mocked system command starts Node; a full rollback can exceed
+        // 20 seconds on slower hosts. Keep a bounded test-only execution budget.
+        encoding: 'utf8', timeout: 60000, stdio: ['ignore', 'pipe', 'pipe'],
       })
       return { status: 0, stdout }
     } catch (error) {
+      // A timeout/signal is a harness failure, not the expected script rejection.
+      // Preserve its diagnostic instead of reporting an empty stderr assertion.
+      if (error.status == null) throw error
       return { status: error.status, stdout: String(error.stdout), stderr: String(error.stderr) }
     }
   }

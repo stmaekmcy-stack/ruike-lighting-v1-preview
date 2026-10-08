@@ -141,6 +141,9 @@ svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: 
 .standard-section__intro > .section-kicker { align-self: start; margin: 8px 0 0; }
 .standard-section__intro > p:last-child { max-width: 360px; margin: 0 0 5px; color: #d8d6cf; font-size: 14px; line-height: 1.85; }
 .standard-section__intro-copy span { display: block; }
+.standard-section__detail-link { min-height: 44px; margin-top: 32px; padding: 10px 0; color: var(--white); font-size: 14px; }
+.standard-section__detail-link svg { transition: none; }
+.standard-section__detail-link:hover svg { transform: none; }
 .principle-list { display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px; margin-top: 88px; }
 .principle { min-width: 0; padding-top: 22px; border-top: 1px solid var(--line-light); }
 .principle__visual { position: relative; height: 226px; margin-bottom: 28px; overflow: hidden; background: #212323; }
