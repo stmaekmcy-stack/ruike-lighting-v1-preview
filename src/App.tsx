@@ -681,6 +681,9 @@ function App() {
                 </article>
               ))}
             </div>
+            <a className="text-link standard-section__detail-link" href={withBasePath('lighting-delivery/#section-2')}>
+              了解完整判断标准 <Icon name="arrow" />
+            </a>
           </div>
         </section>
 

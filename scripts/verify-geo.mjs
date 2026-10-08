@@ -23,6 +23,10 @@ let graphsChecked = 0
 for (const file of htmlFiles) {
   const html = readFileSync(file, 'utf8')
   const relative = file.slice(dist.length + 1)
+  if (relative === 'index.html') {
+    const standardSection = html.match(/<section[^>]*id="standard"[^>]*>([\s\S]*?)<\/section>/)?.[1] || ''
+    assert.ok(standardSection.includes(`href="${base}lighting-delivery/#section-2"`), 'Homepage good-light standards need a direct contextual entry to the detail page')
+  }
   if (relative === 'about/index.html') {
     for (const value of ['我们的使命', '我们的愿景', '客户第一', '专业务实', '结果担当', '持续成长', '非项目实拍']) {
       assert.ok(html.includes(value), `About page is statically readable: ${value}`)
@@ -40,6 +44,18 @@ for (const file of htmlFiles) {
   }
   if (relative === 'lighting-delivery/index.html') {
     assert.ok(html.includes(goodLight.definition), 'The delivery page must render the complete good-light definition')
+    const definitionDisclosure = html.match(/<details class="delivery-disclosure delivery-definition">([\s\S]*?)<\/details>/)?.[1] || ''
+    assert.ok(definitionDisclosure.includes(goodLight.definition), 'The original definition must remain available in a native disclosure')
+    const outline = html.match(/<nav aria-label="本页内容">([\s\S]*?)<\/nav>/)?.[1] || ''
+    for (const id of ['section-1', 'section-2', 'section-3', 'delivery-faq']) {
+      assert.ok(outline.includes(`href="#${id}"`) && html.includes(`id="${id}"`), `Delivery outline must link to its real section: ${id}`)
+    }
+    for (const observation of goodLight.observations) {
+      assert.ok(html.includes(`<dt>${observation.title}</dt>`), 'The five approved names must remain visible in the reading page')
+    }
+    assert.ok(html.includes(`href="${base}#start"`), 'Delivery CTA must lead to the existing consultation section')
+    assert.ok(html.includes(`href="${base}#process"`), 'Delivery page must retain access to the approved seven-step process')
+    assert.doesNotMatch(html, /<script[^>]+(?:type="module"|src=)/, 'Delivery content, navigation and disclosures must work without client JavaScript')
   }
   assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1, `${relative}: one H1 in raw HTML`)
   assert.doesNotMatch(html, /__RUIKE_|github\.io|localhost|example\.com/, relative)
