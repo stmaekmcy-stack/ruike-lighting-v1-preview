@@ -109,7 +109,7 @@ export default function AboutPage({ page }: { page: KnowledgePage }) {
         <section className="about-values page-width about-section" aria-labelledby="values-title">
           <div className="about-values__heading">
             <h2 className="about-heading" id="values-title">核心价值观</h2>
-            <p className="about-body">我们判断对错、取舍与优先级的标准。</p>
+            <p className="about-body">我们判断对错、取舍<br />与优先级的标准。</p>
           </div>
           <div className="about-values__list">
             {culture.values.map((value) => (
