@@ -52,6 +52,19 @@
 .about-shell .about-purpose__statement { max-width: 20em; margin: 24px 0; font-size: clamp(24px, 2.25vw, 32px); font-weight: 500; line-height: 1.6; letter-spacing: -.045em; }
 .about-shell .about-purpose__statement--mission { font-size: clamp(22px, 1.85vw, 28px); line-height: 1.9; }
 .about-purpose .about-body { max-width: 31em; }
+.about-good-light { border-bottom: 1px solid var(--line); }
+.about-good-light__intro { display: grid; grid-template-columns: 1fr 1.9fr; gap: 96px; align-items: start; }
+.about-good-light__intro .about-heading { max-width: 8em; }
+.about-good-light__intro .about-body { max-width: 34em; }
+.about-good-light__observations { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 28px; margin: 42px 0 0; padding: 0; }
+.about-good-light__observations > div { padding-top: 20px; border-top: 1px solid #a19a8f; }
+.about-good-light__observations dt { font-size: 22px; font-weight: 500; line-height: 1.5; white-space: nowrap; }
+.about-good-light__observations dt span { display: block; margin-bottom: 12px; color: #725832; font: 12px/1.6 "DM Mono", monospace; }
+.about-good-light__observations dd { margin: 14px 0 0; color: #565951; font-size: 15px; line-height: 1.85; }
+.about-good-light__conclusion { display: flex; justify-content: space-between; align-items: center; gap: 32px; margin-top: 36px; }
+.about-good-light__conclusion p { font-size: 16px; line-height: 1.85; }
+.about-good-light__conclusion p span { display: block; color: #565951; font-size: 14px; }
+.about-good-light__conclusion .about-link { flex-shrink: 0; }
 .about-values { display: grid; grid-template-columns: 1fr 1.9fr; gap: 96px; }
 .about-values__heading .about-body { max-width: 15em; margin-top: 20px; }
 .about-value { display: grid; grid-template-columns: 140px 1fr; gap: 28px; padding: 30px 0; border-top: 1px solid var(--line); }
@@ -102,6 +115,9 @@
   .about-values, .about-faq, .about-contact { gap: 48px; grid-template-columns: 1fr 2fr; }
   .about-value { grid-template-columns: 112px 1fr; gap: 20px; }
   .about-purpose__grid { grid-template-columns: 1fr; gap: 40px; }
+  .about-good-light__intro { gap: 48px; grid-template-columns: 1fr 2fr; }
+  .about-good-light__observations { gap: 20px; }
+  .about-good-light__observations dt { font-size: 20px; }
   .about-project { gap: 48px; padding: 40px; }
 }
 @media (max-width: 760px) {
@@ -133,6 +149,14 @@
   .about-shell .about-purpose__statement { font-size: 25px; margin: 18px 0; line-height: 1.65; }
   .about-shell .about-purpose__statement--mission { font-size: clamp(18px, 4.9vw, 25px); line-height: 1.9; letter-spacing: -.05em; }
   .about-purpose__statement--mission .title-line { white-space: nowrap; }
+  .about-good-light__intro { grid-template-columns: 1fr; gap: 22px; }
+  .about-good-light__observations { grid-template-columns: 1fr; gap: 0; margin-top: 28px; }
+  .about-good-light__observations > div { display: grid; grid-template-columns: 80px minmax(0, 1fr); gap: 24px; padding: 18px 0; }
+  .about-good-light__observations dt { font-size: 19px; }
+  .about-good-light__observations dt span { margin-bottom: 6px; }
+  .about-good-light__observations dd { margin: 0; }
+  .about-good-light__conclusion { flex-direction: column; align-items: start; gap: 12px; margin-top: 10px; }
+  .about-good-light__conclusion p { font-size: 15px; }
   .about-values { grid-template-columns: 1fr; gap: 32px; }
   .about-values__heading .about-body { max-width: none; margin-top: 12px; }
   .about-value { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }

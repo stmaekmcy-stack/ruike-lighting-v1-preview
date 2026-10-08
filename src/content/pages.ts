@@ -1,4 +1,5 @@
 import { brand } from './brand'
+import { goodLight } from './good-light'
 import { SITE_URL } from '../config/site'
 import { companyConfig } from '../config/company'
 
@@ -137,7 +138,7 @@ export const knowledgePages: KnowledgePage[] = [
   },
   {
     slug: 'lighting-delivery',
-    updated: '2026-09-23',
+    updated: '2026-10-08',
     label: '灯光效果交付',
     title: '什么是灯光效果交付？',
     description: '灯光效果交付围绕真实空间中的视觉结果，连接需求、设计、产品、现场协同、调试与验收。了解它的工作对象和验收方式。',
@@ -147,7 +148,7 @@ export const knowledgePages: KnowledgePage[] = [
         '“温暖”“有层次”“不刺眼”表达了期待，但还需要结合使用位置、被照对象、材料和场景继续明确。比如阅读区域与休息区域的需求不同，同一空间在会客与夜间使用时也可能需要不同的灯光状态。',
         '把这些情境与平面布局、材料、家具和控制方式一起讨论，能让效果目标更明确，也方便设计与实施团队共同理解。',
       ] },
-      { title: '瑞客从五个观察面判断效果', paragraphs: ['效果判断需要同时考虑以下观察面，单项参数不能替代整体体验。'], bullets: [
+      { title: '瑞客从五个观察面判断效果', paragraphs: [goodLight.definition, '效果判断需要同时考虑以下观察面，单项参数不能替代整体体验。'], bullets: [
         '视觉需求：实际活动所需的视觉条件是否得到适宜回应。',
         '视觉舒适：在主要使用与观看位置，能否自然、稳定地观看。',
         '对象呈现：人物、物品与材料是否被恰当呈现。',

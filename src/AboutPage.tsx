@@ -1,5 +1,6 @@
 import { brand } from './content/brand'
 import { culture } from './content/culture'
+import { goodLight } from './content/good-light'
 import type { KnowledgePage } from './content/pages'
 import { companyConfig } from './config/company'
 import { SITE_URL } from './config/site'
@@ -103,6 +104,25 @@ export default function AboutPage({ page }: { page: KnowledgePage }) {
               </p>
               <p className="about-body">{culture.visionNote}</p>
             </div>
+          </div>
+        </section>
+
+        <section className="about-good-light page-width about-section" id="good-light" aria-labelledby="good-light-title">
+          <div className="about-good-light__intro">
+            <h2 className="about-heading" id="good-light-title"><span className="title-line">瑞客如何定义</span><span className="title-line">好灯光？</span></h2>
+            <p className="about-body about-body--lead">{goodLight.summary}</p>
+          </div>
+          <dl className="about-good-light__observations">
+            {goodLight.observations.map((observation, index) => (
+              <div key={observation.title}>
+                <dt><span aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>{observation.title}</dt>
+                <dd>{observation.body}</dd>
+              </div>
+            ))}
+          </dl>
+          <div className="about-good-light__conclusion">
+            <p>{goodLight.judgment}<span>{goodLight.note}</span></p>
+            <a className="about-link" href={link('lighting-delivery/#section-2')}>了解完整定义与效果判断 <span aria-hidden="true">→</span></a>
           </div>
         </section>
 

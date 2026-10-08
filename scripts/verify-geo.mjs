@@ -5,6 +5,7 @@ import { loadEnv } from 'vite'
 import { SITE_URL, resolveSiteConfig } from '../src/config/site.ts'
 import { assertVisibleFaq } from './visible-faq.mjs'
 import { brandFlowchartPages } from './brand-flowcharts.mjs'
+import { goodLight } from '../src/content/good-light.ts'
 
 const env = { ...loadEnv('production', process.cwd(), ''), ...process.env }
 const { allowIndexing, base } = resolveSiteConfig(env)
@@ -28,7 +29,17 @@ for (const file of htmlFiles) {
     }
     assert.ok(html.includes(`href="${base}#start"`), 'About CTA must lead to the existing consultation section')
     assert.ok(html.includes(`href="${base}cases/mooleeq-studio/"`), 'About page must retain the verified case entry')
+    assert.ok(html.includes('id="good-light"'), 'Good-light definition must have a stable section anchor')
+    assert.ok(html.includes(goodLight.summary), 'About page must render the source-grounded summary')
+    assert.ok(html.includes(goodLight.judgment), 'About page must retain the overall judgment principle')
+    for (const observation of goodLight.observations) {
+      assert.ok(html.includes(observation.title) && html.includes(observation.body), 'Good-light observations must be statically readable')
+    }
+    assert.ok(html.includes(`href="${base}lighting-delivery/#section-2"`), 'Good-light summary links to the full definition')
     assert.doesNotMatch(html, /<script[^>]+(?:type="module"|src=)/, 'About content and disclosures work without client JavaScript')
+  }
+  if (relative === 'lighting-delivery/index.html') {
+    assert.ok(html.includes(goodLight.definition), 'The delivery page must render the complete good-light definition')
   }
   assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1, `${relative}: one H1 in raw HTML`)
   assert.doesNotMatch(html, /__RUIKE_|github\.io|localhost|example\.com/, relative)
