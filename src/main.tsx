@@ -5,6 +5,7 @@ import KnowledgePage from './KnowledgePage'
 import { knowledgePages } from './content/pages'
 import './styles.css'
 import './knowledge.css'
+import './about.css'
 
 const path = window.location.pathname.slice(import.meta.env.BASE_URL.length).replace(/\/$/, '')
 const page = knowledgePages.find((item) => item.slug === path)

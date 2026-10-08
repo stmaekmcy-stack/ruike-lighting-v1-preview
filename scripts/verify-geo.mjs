@@ -22,6 +22,14 @@ let graphsChecked = 0
 for (const file of htmlFiles) {
   const html = readFileSync(file, 'utf8')
   const relative = file.slice(dist.length + 1)
+  if (relative === 'about/index.html') {
+    for (const value of ['我们的使命', '我们的愿景', '客户第一', '专业务实', '结果担当', '持续成长', '非项目实拍']) {
+      assert.ok(html.includes(value), `About page is statically readable: ${value}`)
+    }
+    assert.ok(html.includes(`href="${base}#start"`), 'About CTA must lead to the existing consultation section')
+    assert.ok(html.includes(`href="${base}cases/mooleeq-studio/"`), 'About page must retain the verified case entry')
+    assert.doesNotMatch(html, /<script[^>]+(?:type="module"|src=)/, 'About content and disclosures work without client JavaScript')
+  }
   assert.equal((html.match(/<h1(?:\s|>)/g) || []).length, 1, `${relative}: one H1 in raw HTML`)
   assert.doesNotMatch(html, /__RUIKE_|github\.io|localhost|example\.com/, relative)
   const title = html.match(/<title>([^<]+)<\/title>/)?.[1]

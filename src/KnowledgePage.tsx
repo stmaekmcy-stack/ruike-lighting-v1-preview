@@ -2,10 +2,12 @@ import { brand } from './content/brand'
 import { knowledgePages } from './content/pages'
 import type { KnowledgePage as Page } from './content/pages'
 import { companyConfig } from './config/company'
+import AboutPage from './AboutPage'
 
 const link = (path = '') => `${import.meta.env.BASE_URL}${path}`
 
 export default function KnowledgePage({ page }: { page: Page }) {
+  if (page.slug === 'about') return <AboutPage page={page} />
   const childPages = knowledgePages.filter((item) => item.parent?.slug === page.slug)
   return (
     <div className="knowledge-shell">

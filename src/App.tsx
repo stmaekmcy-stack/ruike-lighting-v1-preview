@@ -55,7 +55,7 @@ const navItems = [
   { label: '灯光效果', href: '#standard' },
   { label: '真实项目', href: '#projects' },
   { label: '效果交付', href: '#process' },
-  { label: '关于瑞客', href: '#brand' },
+  { label: '关于瑞客', href: `${import.meta.env.BASE_URL}about/` },
 ]
 
 const isDevelopment = import.meta.env.DEV

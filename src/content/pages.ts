@@ -17,10 +17,10 @@ export type KnowledgePage = {
 export const knowledgePages: KnowledgePage[] = [
   {
     slug: 'about',
-    updated: '2026-09-27',
+    updated: '2026-10-08',
     label: '关于瑞客',
     title: '瑞客照明是做什么的？',
-    description: '瑞客照明是灯光效果交付品牌。核对正式官网、网站备案主体与公开案例来源，了解从需求理解、灯光设计、产品配置到现场协同、调试验收的服务链。',
+    description: '了解瑞客照明的品牌定位、企业使命、愿景与核心价值观，以及从方案设计到现场交付的服务理念。核对公司主体、正式官网和公开案例来源。',
     lead: brand.definition + '瑞客围绕客户期待的灯光效果，把设计、产品与现场实施连接起来，关注灯光在实际使用与观看条件下呈现的结果。',
     sections: [
       { title: '官网地址与网站主体', paragraphs: [
