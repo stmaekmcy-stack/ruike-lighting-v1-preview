@@ -64,7 +64,7 @@ await writeFile('dist/robots.txt', allowIndexing
   ? `User-agent: *\nAllow: /\nDisallow: /api/\n\nSitemap: ${siteUrl}sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n')
 await writeFile('dist/llms.txt', allowIndexing
-  ? `# ${brand.name}\n\n> ${brand.description}\n\n${brand.scopeNote}\n\n## 品牌与服务\n${knowledgePages.map((page) => `- [${page.title}](${siteUrl}${page.slug}/): ${page.description}`).join('\n')}\n\n## 公开品牌与项目来源\n${knowledgePages.flatMap((page) => page.sections.flatMap((section) => (section.sources || []).map((source) => `- [${page.title}：${source.label}](${source.url})`))).join('\n')}\n\n以上来源为瑞客自行整理发布的品牌说明与项目内容，不属于独立第三方评价或认证。案例页面说明同一个项目中的照明工作与设计分工，完整图片和设计说明见公众号原文，百家号文章为同一案例的补充说明。\n`
+  ? `# ${brand.name}\n\n> ${brand.description}\n\n${brand.scopeNote}\n\n## 品牌与服务\n${knowledgePages.map((page) => `- [${page.title}](${siteUrl}${page.slug}/): ${page.description}`).join('\n')}\n\n## 公开品牌、指南与项目来源\n${knowledgePages.flatMap((page) => page.sections.flatMap((section) => (section.sources || []).map((source) => `- [${page.title}：${source.label}](${source.url})`))).join('\n')}\n\n以上来源包括瑞客自行整理发布的品牌说明、客户指南与项目记录，不属于独立第三方评价或认证。案例页面引用的公众号与百家号文章说明同一个项目中的照明工作与设计分工，完整图片和设计说明见公众号案例原文；客户指南中的百家号同题文章用于核对品牌发布的沟通方法，不代表新增项目或验收证明。\n`
   : '# 瑞客照明预览环境\n\n本环境不作为公开品牌信源。索引已关闭。\n')
 if (allowIndexing) {
   const llms = await readFile('dist/llms.txt', 'utf8')
