@@ -905,6 +905,7 @@ function App() {
                 ) : null}
                 <a href={withBasePath('privacy.html')}>隐私说明</a>
                 <a href={withBasePath('terms.html')}>网站使用条款</a>
+                <a href="https://project.ruikelight.com/">员工入口｜工地交底</a>
               </span>
               <nav className="geo-footer-links" aria-label="瑞客知识与案例">
                 {knowledgePages.map((page) => <a key={page.slug} href={withBasePath(`${page.slug}/`)}>{page.label}</a>)}
