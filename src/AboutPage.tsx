@@ -211,6 +211,7 @@ export default function AboutPage({ page }: { page: KnowledgePage }) {
             <a href={link('brand-flowcharts/')}>品牌素材库</a>
             <a href={link('privacy.html')}>隐私说明</a>
             <a href={link('terms.html')}>网站使用条款</a>
+            <a href="https://project.ruikelight.com/">员工入口｜工地交底</a>
             {companyConfig.icpNumber ? <a href="https://beian.miit.gov.cn/" target="_blank" rel="noreferrer">{companyConfig.icpNumber}</a> : null}
           </nav>
         </div>
